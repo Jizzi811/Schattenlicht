@@ -1,13 +1,13 @@
 /* =====================================================================
    Schattenlicht Voice-Orb
-   Lebendige, atmende Energie-Sphäre im getlayers-Stil.
-   Ebenen (per orb-visual.js in den Button injiziert):
+   Glänzende, irisierende Seifenblasen-Sphäre auf dunklem Grund.
+   Ebenen:
      .sl-orb-aura      – äußerer, weicher Glow
-     .sl-orb-shell     – organische Membran / Blob-Hülle (clippt das Canvas)
-     .sl-orb-canvas    – Plasma-/Nebula-Kern (audio-reaktiv)
-     .sl-orb-sheen     – Glanzlicht / Glas-Highlight
-     .sl-orb-spark     – kleine Lichtschimmer außerhalb
-   Zustände laufen über [data-state], Audiopegel über --orb-level (0–1).
+     .sl-orb-shell     – runde Glas-Hülle (clippt das Canvas)
+     .sl-orb-canvas    – irisierende Sphäre + Thin-Film-Bänder (audio-reaktiv)
+     .sl-orb-sheen     – Glossy-Glanzlicht
+   Zustände laufen über [data-state], Audiopegel über --orb-level (0–1),
+   die Stimmung/Farbe über [data-mood] (siehe orb-visual.js).
    ===================================================================== */
 
 .sl-orb-stage {
@@ -76,52 +76,36 @@
 
 /* 1) Äußerer Glow ---------------------------------------------------- */
 .sl-orb-aura {
-  inset: -58%;
+  inset: -56%;
   border-radius: 50%;
   background:
-    radial-gradient(circle closest-side at 50% 50%, rgba(var(--orb-magenta), 0.5), rgba(var(--orb-accent), 0.34) 40%, transparent 74%),
-    radial-gradient(circle closest-side at 46% 42%, rgba(120, 92, 255, 0.32), transparent 64%);
-  filter: blur(30px);
-  opacity: calc(0.7 + var(--orb-level) * 0.3);
+    radial-gradient(circle closest-side at 50% 50%, rgba(96, 120, 240, 0.46), rgba(140, 80, 230, 0.32) 42%, transparent 74%),
+    radial-gradient(circle closest-side at 54% 58%, rgba(200, 70, 190, 0.26), transparent 66%);
+  filter: blur(32px);
+  opacity: calc(0.62 + var(--orb-level) * 0.32);
   transform: scale(calc(0.86 + var(--orb-level) * 0.22));
   transition: opacity 150ms linear, transform 150ms linear;
   animation: sl-orb-aura 7.5s ease-in-out infinite;
   z-index: 0;
 }
 
-/* 2) Organische Membran / Blob-Hülle -------------------------------- */
+/* 2) Glasige Sphären-Hülle (clippt das Canvas) ---------------------- */
 .sl-orb-shell {
   inset: 0;
   overflow: hidden;
-  border-radius: 46% 54% 53% 47% / 52% 46% 54% 48%;
-  background:
-    radial-gradient(circle at 50% 48%, rgba(40, 18, 66, 0.30), rgba(14, 7, 26, 0.72) 74%);
-  /* Nur ein dezenter Innenschatten – der farbige Glow läuft über .sl-orb-aura,
+  border-radius: 50%;
+  background: rgba(8, 5, 18, 0.6);
+  /* Dezenter Innenschatten für Tiefe; der farbige Glow läuft über .sl-orb-aura,
      weil ein großer Outer-Shadow auf einem transform+overflow-Element in
      Chromium zu einem quadratischen Artefakt führt. */
-  box-shadow: inset 0 0 34px rgba(8, 4, 20, 0.5);
-  animation: sl-orb-morph 11s ease-in-out infinite;
+  box-shadow:
+    inset 0 -8px 26px rgba(6, 3, 16, 0.6),
+    inset 0 4px 16px rgba(180, 200, 255, 0.08);
+  animation: sl-orb-morph 12s ease-in-out infinite;
   z-index: 1;
 }
 
-/* Leuchtende, wispy Magenta-Membran am Rand (der helle Teil sitzt außen) */
-.sl-orb-shell::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background:
-    radial-gradient(circle at 50% 50%,
-      transparent 48%,
-      rgba(var(--orb-magenta), calc(0.32 + var(--orb-level) * 0.4)) 72%,
-      rgba(var(--orb-pink), calc(0.42 + var(--orb-level) * 0.4)) 84%,
-      rgba(var(--orb-accent), 0.24) 94%,
-      transparent 100%);
-  mix-blend-mode: screen;
-  pointer-events: none;
-}
-
-/* 3) Innerer leuchtender Kern (Plasma/Nebula im Canvas) ------------- */
+/* 3) Irisierender Kern (Seifenblasen-Sphäre im Canvas) ------------- */
 .sl-orb-canvas {
   inset: 0;
   width: 100%;
@@ -130,47 +114,34 @@
   display: block;
 }
 
-/* 4) Zartes Glanzlicht (dezent, kein Glas-Look) --------------------- */
+/* 4) Glossy-Glanzlicht oben-links – glänzende Blasenoberfläche ------ */
 .sl-orb-sheen {
   inset: 0;
   border-radius: 50%;
   background:
-    radial-gradient(26% 20% at 36% 28%, rgba(255, 240, 255, 0.28), transparent 62%);
+    radial-gradient(30% 22% at 34% 26%, rgba(255, 255, 255, 0.5), transparent 60%),
+    radial-gradient(60% 46% at 30% 20%, rgba(210, 228, 255, 0.16), transparent 72%);
   mix-blend-mode: screen;
-  opacity: 0.5;
+  opacity: 0.75;
   z-index: 2;
 }
 
-/* 5) Subtile Lichtschimmer außen ------------------------------------ */
-.sl-orb-spark {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: rgba(var(--orb-pink), 0.95);
-  box-shadow: 0 0 10px 2px rgba(var(--orb-pink), 0.7);
-  opacity: 0;
-  z-index: 3;
-  animation: sl-orb-spark 5.5s ease-in-out infinite;
-}
-.sl-orb-spark:nth-child(1) { top: 6%;  left: 62%; animation-delay: 0s;    transform-origin: -60px 70px; }
-.sl-orb-spark:nth-child(2) { top: 74%; left: 14%; animation-delay: 1.6s;  width: 4px; height: 4px; }
-.sl-orb-spark:nth-child(3) { top: 24%; left: 6%;  animation-delay: 2.9s;  width: 5px; height: 5px; background: rgba(var(--orb-accent), 0.95); box-shadow: 0 0 10px 2px rgba(var(--orb-accent), 0.7); }
-.sl-orb-spark:nth-child(4) { top: 84%; left: 72%; animation-delay: 3.7s;  width: 3px; height: 3px; }
+/* 5) Partikel bei der Blasen-Variante nicht sichtbar ---------------- */
+.sl-orb-spark { display: none; }
 
 /* Reiner CSS-Fallback, falls das Canvas (noch) nicht rendert */
 .sl-voice-orb-fallback {
-  inset: 14%;
+  inset: 0;
   border-radius: inherit;
   background:
-    radial-gradient(circle at 40% 34%, rgba(255, 244, 255, 0.9), rgba(var(--orb-magenta), 0.6) 34%, transparent 62%),
-    radial-gradient(circle at 66% 70%, rgba(var(--orb-accent), 0.75), transparent 64%);
-  filter: blur(2px);
+    linear-gradient(135deg, rgba(70, 120, 235, 0.95), rgba(96, 60, 210, 0.9) 45%, rgba(140, 40, 170, 0.9)),
+    radial-gradient(40% 34% at 32% 26%, rgba(220, 235, 255, 0.6), transparent 60%);
   z-index: 1;
 }
 .sl-voice-orb.is-canvas-ready .sl-voice-orb-fallback { display: none; }
 
 .sl-voice-orb:hover .sl-orb-shell {
-  filter: brightness(1.08) saturate(1.1);
+  filter: brightness(1.06) saturate(1.06);
 }
 
 /* ================================================================== */
@@ -223,16 +194,12 @@
   filter: saturate(0.7) brightness(0.9);
 }
 
-/* Error / Mikrofon verweigert – gedämpfter violett-rötlicher Zustand */
+/* Error / Mikrofon verweigert – gedämpfter violett-rötlicher Zustand.
+   Die Farben liefert das Canvas (ERROR_STOPS); hier nur zusätzlich dämpfen. */
 .sl-voice-orb[data-state='error'] .sl-orb-shell,
 .sl-voice-orb[data-state='microphoneDenied'] .sl-orb-shell {
-  background:
-    radial-gradient(circle at 34% 30%, rgba(255, 190, 205, 0.28), transparent 48%),
-    radial-gradient(circle at 70% 74%, rgba(150, 40, 90, 0.42), transparent 62%),
-    radial-gradient(circle at 50% 50%, rgba(48, 16, 40, 0.6), rgba(12, 5, 16, 0.94) 78%);
-  box-shadow: inset 0 0 40px rgba(8, 4, 12, 0.7);
   animation: sl-orb-morph 16s ease-in-out infinite;
-  filter: saturate(0.85);
+  filter: saturate(0.85) brightness(0.9);
 }
 .sl-voice-orb[data-state='error'] .sl-orb-aura,
 .sl-voice-orb[data-state='microphoneDenied'] .sl-orb-aura {
@@ -281,12 +248,11 @@
   50%      { opacity: 0.95; }
 }
 
-/* Organische, deutlich unregelmäßige Verformung + Atmen der Hülle */
+/* Sanftes Atmen einer runden Blase (nur leichte Verformung) */
 @keyframes sl-orb-morph {
-  0%, 100% { border-radius: 44% 56% 54% 46% / 55% 44% 56% 45%; transform: scale(1) rotate(0deg); }
-  25%      { border-radius: 57% 43% 44% 56% / 43% 57% 45% 55%; transform: scale(1.02) rotate(2deg); }
-  50%      { border-radius: 48% 52% 58% 42% / 58% 43% 57% 42%; transform: scale(1.035) rotate(0deg); }
-  75%      { border-radius: 43% 57% 47% 53% / 47% 56% 42% 58%; transform: scale(1.02) rotate(-3deg); }
+  0%, 100% { border-radius: 50% 50% 50% 50% / 50% 50% 50% 50%; transform: scale(1); }
+  33%      { border-radius: 51% 49% 50% 50% / 49% 51% 49% 51%; transform: scale(1.022); }
+  66%      { border-radius: 49% 51% 51% 49% / 51% 49% 51% 49%; transform: scale(1.032); }
 }
 
 @keyframes sl-orb-connect {
@@ -298,12 +264,6 @@
 @keyframes sl-orb-pulse {
   0%, 100% { transform: scale(0.975); }
   50%      { transform: scale(1.05); }
-}
-
-@keyframes sl-orb-spark {
-  0%, 100% { opacity: 0; transform: translate(0, 0) scale(0.6); }
-  40%      { opacity: 0.9; transform: translate(4px, -8px) scale(1); }
-  70%      { opacity: 0.5; transform: translate(-3px, -14px) scale(0.8); }
 }
 
 /* ================================================================== */

@@ -213,7 +213,19 @@ function detachAllAudio() {
   stopVisualizer();
 }
 
+// Stimmung des Agenten auf den Orb übertragen (Farbwechsel je nach Stimmung).
+// Der Agent kann dazu ein Attribut "mood" (oder "lk.agent.mood") setzen, z. B.
+// calm, cool, deep, warm, tender, alert. Ohne Wert driftet die Farbe sanft von
+// selbst (siehe orb-visual.js).
+function applyMood(attributes) {
+  const mood = attributes?.['mood'] ?? attributes?.['lk.agent.mood'];
+  if (typeof mood === 'string' && mood.trim()) {
+    orb.dataset.mood = mood.trim().toLowerCase();
+  }
+}
+
 function readAgentState(participant) {
+  applyMood(participant?.attributes);
   const state = participant?.attributes?.['lk.agent.state'];
   const normalized = normalizeAgentState(state);
   if (normalized) {
@@ -229,6 +241,9 @@ function registerRoomEvents(activeRoom) {
   });
 
   activeRoom.on(RoomEvent.ParticipantAttributesChanged, (changed, participant) => {
+    if ('mood' in changed || 'lk.agent.mood' in changed) {
+      applyMood(participant?.attributes ?? changed);
+    }
     const rawState = changed['lk.agent.state'];
     const normalized = normalizeAgentState(rawState);
     if (!normalized) return;
@@ -343,6 +358,7 @@ async function startConversation() {
 function cleanupRoom() {
   clearAgentWaitTimer();
   detachAllAudio();
+  delete orb.dataset.mood;
   agentParticipantIdentity = null;
   room = null;
   intentionalDisconnect = false;

@@ -10,34 +10,32 @@
 const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const IS_MOBILE = window.matchMedia('(max-width: 720px)').matches;
 
-/* Farbpaletten (r, g, b) – violett / magenta / pink-violette Highlights */
-const PALETTE = [
-  [190, 132, 255], // violett
-  [236, 96, 205],  // magenta
-  [255, 138, 210], // pink
-  [138, 108, 255], // indigo-violett
-  [120, 150, 255], // kühles blau-violett
+/* Basis-Farbverlauf der Sphäre (irisierende Seifenblase, r,g,b) */
+const BASE_STOPS = [
+  [0.00, 70, 120, 235],  // beleuchtete blaue Seite (oben-links)
+  [0.42, 82, 64, 214],   // blau-violett
+  [0.72, 128, 50, 196],  // violett
+  [1.00, 118, 34, 118],  // magenta-dunkel (Terminator unten-rechts)
 ];
-const ERROR_PALETTE = [
-  [190, 74, 108],
-  [150, 60, 120],
-  [110, 52, 118],
+const ERROR_STOPS = [
+  [0.00, 150, 70, 96],
+  [0.5, 110, 48, 96],
+  [1.00, 70, 28, 74],
 ];
-const CORE_COLOR = [255, 238, 252];
 
-/* Pro-Zustand-Charakteristik der Animation */
+/* Pro-Zustand-Charakteristik: band = Fluss der Iris-Bänder, drift = Rotation */
 const STATE_PROFILE = {
-  ready:        { speed: 0.55, spin: 0.05, coreBase: 0.30, coreGain: 0.35, amp: 0.16, bright: 0.9,  error: false },
-  connecting:   { speed: 1.25, spin: 0.10, coreBase: 0.42, coreGain: 0.30, amp: 0.30, bright: 1.05, error: false },
-  initializing: { speed: 1.05, spin: 0.10, coreBase: 0.40, coreGain: 0.30, amp: 0.26, bright: 1.0,  error: false },
-  idle:         { speed: 0.55, spin: 0.05, coreBase: 0.34, coreGain: 0.40, amp: 0.18, bright: 0.95, error: false },
-  listening:    { speed: 0.75, spin: 0.06, coreBase: 0.46, coreGain: 0.55, amp: 0.24, bright: 1.08, error: false },
-  thinking:     { speed: 0.7,  spin: 0.55, coreBase: 0.38, coreGain: 0.30, amp: 0.30, bright: 0.9,  error: false },
-  speaking:     { speed: 1.05, spin: 0.16, coreBase: 0.34, coreGain: 0.5,  amp: 0.46, bright: 1.1,  error: false },
-  audioBlocked: { speed: 0.6,  spin: 0.05, coreBase: 0.34, coreGain: 0.30, amp: 0.18, bright: 0.9,  error: false },
-  disconnected: { speed: 0.4,  spin: 0.03, coreBase: 0.26, coreGain: 0.20, amp: 0.12, bright: 0.75, error: false },
-  error:        { speed: 0.45, spin: 0.04, coreBase: 0.24, coreGain: 0.18, amp: 0.14, bright: 0.7,  error: true },
-  microphoneDenied: { speed: 0.45, spin: 0.04, coreBase: 0.24, coreGain: 0.18, amp: 0.14, bright: 0.7, error: true },
+  ready:        { band: 0.18, drift: 0.02, bright: 0.92, error: false },
+  idle:         { band: 0.18, drift: 0.02, bright: 0.96, error: false },
+  connecting:   { band: 0.52, drift: 0.05, bright: 1.06, error: false },
+  initializing: { band: 0.42, drift: 0.05, bright: 1.0,  error: false },
+  listening:    { band: 0.3,  drift: 0.03, bright: 1.08, error: false },
+  thinking:     { band: 0.32, drift: 0.16, bright: 0.95, error: false },
+  speaking:     { band: 0.6,  drift: 0.07, bright: 1.14, error: false },
+  audioBlocked: { band: 0.2,  drift: 0.02, bright: 0.9,  error: false },
+  disconnected: { band: 0.1,  drift: 0.01, bright: 0.75, error: false },
+  error:        { band: 0.12, drift: 0.01, bright: 0.72, error: true },
+  microphoneDenied: { band: 0.12, drift: 0.01, bright: 0.72, error: true },
 };
 
 function waitForElement(selector, timeoutMs = 20000) {
@@ -92,19 +90,52 @@ function lerp(a, b, t) {
   return a + (b - a) * t;
 }
 
-function mixPalette(palette, phase) {
-  // Weicher Farbverlauf durch die Palette.
-  const n = palette.length;
-  const scaled = ((phase % 1) + 1) % 1 * n;
-  const i = Math.floor(scaled);
-  const frac = scaled - i;
-  const c0 = palette[i % n];
-  const c1 = palette[(i + 1) % n];
-  return [
-    Math.round(lerp(c0[0], c1[0], frac)),
-    Math.round(lerp(c0[1], c1[1], frac)),
-    Math.round(lerp(c0[2], c1[2], frac)),
-  ];
+/* Stimmungs-Presets: verschieben Farbton (Grad) und Sättigung der Sphäre.
+   Über orb.dataset.mood setzbar – so lässt sich die Farbe an die Stimmung
+   koppeln. Ohne mood driftet die Farbe langsam von selbst (ambient). */
+const MOODS = {
+  neutral: { hue: 0,   sat: 1.0 },
+  calm:    { hue: -18, sat: 0.95 }, // ruhiger, kühler Blauton
+  cool:    { hue: -46, sat: 1.0 },  // Cyan/Teal
+  deep:    { hue: 18,  sat: 1.02 }, // tiefes Violett
+  warm:    { hue: 52,  sat: 1.05 }, // Magenta/Pink
+  tender:  { hue: 40,  sat: 0.9 },  // sanftes Rosé
+  alert:   { hue: 92,  sat: 1.1 },  // rötlich-warnend
+};
+
+// RGB -> HSL -> Rotation -> RGB, damit die ganze Sphäre den Farbton wechselt.
+function rgbToHsl(r, g, b) {
+  r /= 255; g /= 255; b /= 255;
+  const max = Math.max(r, g, b), min = Math.min(r, g, b);
+  let h = 0, s = 0; const l = (max + min) / 2;
+  const d = max - min;
+  if (d !== 0) {
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+    if (max === r) h = ((g - b) / d + (g < b ? 6 : 0));
+    else if (max === g) h = (b - r) / d + 2;
+    else h = (r - g) / d + 4;
+    h /= 6;
+  }
+  return [h * 360, s, l];
+}
+function hslToRgb(h, s, l) {
+  h = ((h % 360) + 360) % 360 / 360;
+  if (s === 0) { const v = Math.round(l * 255); return [v, v, v]; }
+  const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+  const p = 2 * l - q;
+  const hk = (t) => {
+    t = (t % 1 + 1) % 1;
+    if (t < 1 / 6) return p + (q - p) * 6 * t;
+    if (t < 1 / 2) return q;
+    if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+    return p;
+  };
+  return [Math.round(hk(h + 1 / 3) * 255), Math.round(hk(h) * 255), Math.round(hk(h - 1 / 3) * 255)];
+}
+// Farbton drehen + Sättigung skalieren.
+function shift([r, g, b], deg, satMul) {
+  const [h, s, l] = rgbToHsl(r, g, b);
+  return hslToRgb(h + deg, Math.max(0, Math.min(1, s * satMul)), l);
 }
 
 async function init() {
@@ -121,7 +152,6 @@ async function init() {
   orb.classList.add('is-canvas-ready');
 
   const dpr = Math.min(window.devicePixelRatio || 1, IS_MOBILE ? 1.6 : 2);
-  const blobCount = IS_MOBILE ? 4 : 6;
   let size = 0;
 
   const resize = () => {
@@ -138,17 +168,6 @@ async function init() {
   ro?.observe(canvas);
   window.addEventListener('resize', resize, { passive: true });
 
-  // Blob-Parameter (Bewegungspfade, Frequenzen, Farbphasen).
-  const blobs = Array.from({ length: blobCount }, (_, i) => ({
-    fx: 0.6 + Math.random() * 0.9,
-    fy: 0.6 + Math.random() * 0.9,
-    px: Math.random() * Math.PI * 2,
-    py: Math.random() * Math.PI * 2,
-    orbit: 0.16 + Math.random() * 0.2,
-    baseR: 0.34 + Math.random() * 0.18,
-    hue: i / blobCount,
-  }));
-
   const currentProfile = () => {
     const state = orb.dataset.state || 'ready';
     return STATE_PROFILE[state] || STATE_PROFILE.ready;
@@ -162,9 +181,19 @@ async function init() {
   };
 
   let level = 0;   // geglätteter Audiopegel
-  let rot = 0;     // Rotation für innere Bewegung / Thinking
-  let phase = 0;   // Farbrotation
+  let rot = 0;     // Rotation der Iris-Bänder
+  let phase = 0;   // Fluss der Iris-Bänder
+  let hue = 0;     // aktueller Farbton-Offset (geglättet, Stimmung)
   let last = performance.now();
+
+  // Stimmungs-/Ambient-Farbton: langsames Driften, per data-mood steuerbar.
+  const getMood = (t) => {
+    const key = orb.dataset.mood;
+    const preset = key && MOODS[key] ? MOODS[key] : null;
+    const ambient = Math.sin(t * 0.05) * 18 + Math.sin(t * 0.017) * 8; // ±~26°
+    if (preset) return { hue: preset.hue + ambient * 0.35, sat: preset.sat };
+    return { hue: ambient, sat: 1.0 };
+  };
 
   const render = (now) => {
     const dt = Math.min(0.05, (now - last) / 1000);
@@ -173,74 +202,104 @@ async function init() {
     const p = currentProfile();
     const target = getLevel();
     level = lerp(level, target, 0.18);
-    rot += dt * p.spin * (1 + level * 0.6);
-    phase += dt * 0.05 * p.speed;
+    phase += dt * p.band * (0.7 + level * 0.9);
+    rot += dt * p.drift * (1 + level * 0.5);
 
+    const t = now / 1000;
+    const mood = getMood(t);
+    hue = lerp(hue, mood.hue, 0.02); // sanfter Farbwechsel
+    const sat = p.error ? 0.85 : mood.sat;
+    const bright = p.bright * (0.85 + level * 0.3);
     const c = size / 2;
     const R = size / 2;
-    const palette = p.error ? ERROR_PALETTE : PALETTE;
-    const energy = p.amp + level * 0.5;
-    const bright = p.bright * (0.85 + level * 0.3);
 
     ctx.clearRect(0, 0, size, size);
 
-    // Dunkle Basis (Tiefe im Inneren).
-    const base = ctx.createRadialGradient(c, c, 0, c, c, R);
-    base.addColorStop(0, 'rgba(38, 18, 60, 0.55)');
-    base.addColorStop(1, 'rgba(9, 5, 20, 0.96)');
-    ctx.fillStyle = base;
-    ctx.beginPath();
-    ctx.arc(c, c, R, 0, Math.PI * 2);
-    ctx.fill();
+    // 1) Basis-Sphäre – diagonaler Farbverlauf, per Hue-Shift eingefärbt.
+    const stops = p.error ? ERROR_STOPS : BASE_STOPS;
+    const lg = ctx.createLinearGradient(c - R * 0.66, c - R * 0.72, c + R * 0.6, c + R * 0.86);
+    for (const [pos, r, g, b] of stops) {
+      const [sr, sg, sb] = p.error ? [r, g, b] : shift([r, g, b], hue, sat);
+      lg.addColorStop(pos, `rgb(${sr},${sg},${sb})`);
+    }
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.fillStyle = lg;
+    ctx.fillRect(0, 0, size, size);
 
-    // Plasma-Blobs additiv überlagern.
+    // 2) Sphärische Schattierung – dunkler Terminator unten-rechts.
+    const term = ctx.createRadialGradient(c - R * 0.34, c - R * 0.4, R * 0.15, c + R * 0.16, c + R * 0.22, R * 1.25);
+    term.addColorStop(0, 'rgba(0,0,0,0)');
+    term.addColorStop(0.62, 'rgba(8,4,24,0.16)');
+    term.addColorStop(1, 'rgba(4,2,14,0.78)');
+    ctx.fillStyle = term;
+    ctx.fillRect(0, 0, size, size);
+
+    // 3) Irisierende Thin-Film-Bänder – additiv, rotierend/fließend.
+    const ir = (rgb, alpha) => {
+      const [r, g, b] = p.error ? rgb : shift(rgb, hue, sat);
+      return `rgba(${r},${g},${b},${alpha})`;
+    };
+    const wrap = (x) => -1.25 + (((x % 2.5) + 2.5) % 2.5);
+    const band = (angle, m, colA, colB, colC, a) => {
+      ctx.save();
+      ctx.rotate(angle);
+      const cl = (x) => Math.max(0, Math.min(1, x));
+      const pos = cl((m + 1) / 2);
+      const w = 0.17;
+      const g = ctx.createLinearGradient(-R, 0, R, 0);
+      g.addColorStop(cl(pos - w), 'rgba(0,0,0,0)');
+      g.addColorStop(cl(pos - w * 0.45), colA);
+      g.addColorStop(cl(pos), colB);
+      g.addColorStop(cl(pos + w * 0.45), colC);
+      g.addColorStop(cl(pos + w), 'rgba(0,0,0,0)');
+      ctx.globalAlpha = a * bright;
+      ctx.fillStyle = g;
+      ctx.fillRect(-R, -R, 2 * R, 2 * R);
+      ctx.restore();
+    };
     ctx.save();
-    ctx.globalCompositeOperation = 'lighter';
+    ctx.globalCompositeOperation = 'screen';
     ctx.translate(c, c);
     ctx.rotate(rot);
-
-    const t = now / 1000;
-    for (const b of blobs) {
-      const dx = Math.sin(t * p.speed * b.fx + b.px) * b.orbit * R * (1 + energy);
-      const dy = Math.cos(t * p.speed * b.fy + b.py) * b.orbit * R * (1 + energy);
-      const pulse = 0.85 + 0.15 * Math.sin(t * p.speed * 1.3 + b.px);
-      const radius = b.baseR * R * pulse * (1 + energy * 0.5);
-      const [r, g, bl] = mixPalette(palette, phase + b.hue);
-      const alpha = (0.5 + level * 0.35) * bright;
-
-      const grad = ctx.createRadialGradient(dx, dy, 0, dx, dy, radius);
-      grad.addColorStop(0, `rgba(${r}, ${g}, ${bl}, ${Math.min(0.9, alpha).toFixed(3)})`);
-      grad.addColorStop(0.55, `rgba(${r}, ${g}, ${bl}, ${(alpha * 0.35).toFixed(3)})`);
-      grad.addColorStop(1, `rgba(${r}, ${g}, ${bl}, 0)`);
-      ctx.fillStyle = grad;
-      ctx.beginPath();
-      ctx.arc(dx, dy, radius, 0, Math.PI * 2);
-      ctx.fill();
-    }
-
-    // Leuchtender Kern.
-    const coreR = (p.coreBase + level * p.coreGain) * R * 0.9;
-    const [cr, cg, cb] = CORE_COLOR;
-    const [mr, mg, mb] = p.error ? ERROR_PALETTE[0] : PALETTE[1];
-    const core = ctx.createRadialGradient(0, 0, 0, 0, 0, Math.max(1, coreR));
-    core.addColorStop(0, `rgba(${cr}, ${cg}, ${cb}, ${Math.min(0.82, 0.66 * bright).toFixed(3)})`);
-    core.addColorStop(0.4, `rgba(${mr}, ${mg}, ${mb}, ${(0.5 * bright).toFixed(3)})`);
-    core.addColorStop(1, `rgba(${mr}, ${mg}, ${mb}, 0)`);
-    ctx.fillStyle = core;
-    ctx.beginPath();
-    ctx.arc(0, 0, Math.max(1, coreR), 0, Math.PI * 2);
-    ctx.fill();
+    band(0.55, wrap(phase), ir([90, 210, 255], 0.9), ir([220, 232, 255], 0.85), ir([240, 96, 220], 0.9), 0.30);
+    band(0.55, wrap(phase * 0.7 + 1.1), ir([120, 230, 180], 0.8), ir([210, 225, 255], 0.7), ir([120, 140, 255], 0.8), 0.20);
+    band(-0.35, wrap(phase * 1.25 + 1.9), ir([240, 110, 220], 0.8), ir([230, 235, 255], 0.7), ir([90, 200, 255], 0.8), 0.18);
     ctx.restore();
+    ctx.globalAlpha = 1;
 
-    // Auf einen Kreis maskieren: additive Blobs dürfen nicht in die Ecken
-    // laufen (der CSS-Rundungs-Clip greift bei GPU-Layern nicht zuverlässig).
-    ctx.save();
+    // 4) Fresnel-Rand (heller Umriss).
+    ctx.globalCompositeOperation = 'screen';
+    const [rr, rg, rb] = p.error ? [220, 120, 140] : shift([120, 180, 255], hue, sat);
+    const rim = ctx.createRadialGradient(c, c, R * 0.6, c, c, R);
+    rim.addColorStop(0, 'rgba(0,0,0,0)');
+    rim.addColorStop(0.82, 'rgba(60,120,220,0)');
+    rim.addColorStop(0.93, `rgba(${rr},${rg},${rb},${(0.5 * bright).toFixed(3)})`);
+    rim.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = rim;
+    ctx.fillRect(0, 0, size, size);
+
+    // 5) Heller Halbmond + Glanzpunkt oben-links (Glossy-Look).
+    const hx = c - R * 0.46, hy = c - R * 0.52;
+    const [cr, cg, cb] = p.error ? [230, 180, 190] : shift([170, 205, 255], hue * 0.5, sat);
+    const cres = ctx.createRadialGradient(hx, hy, 0, hx, hy, R * 0.6);
+    cres.addColorStop(0, `rgba(${cr},${cg},${cb},${(0.42 * bright).toFixed(3)})`);
+    cres.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = cres;
+    ctx.fillRect(0, 0, size, size);
+
+    const sp = ctx.createRadialGradient(hx, hy, 0, hx, hy, R * 0.2);
+    sp.addColorStop(0, `rgba(255,255,255,${(0.45 * bright).toFixed(3)})`);
+    sp.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = sp;
+    ctx.fillRect(0, 0, size, size);
+
+    // 6) Auf einen Kreis maskieren (Ecken sauber halten, GPU-Clip unzuverlässig).
     ctx.globalCompositeOperation = 'destination-in';
     ctx.beginPath();
     ctx.arc(c, c, R * 0.995, 0, Math.PI * 2);
     ctx.fillStyle = '#fff';
     ctx.fill();
-    ctx.restore();
+    ctx.globalCompositeOperation = 'source-over';
 
     if (running) rafId = requestAnimationFrame(render);
   };
