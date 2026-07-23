@@ -18,11 +18,10 @@ const UI_TEXT = {
   audioBlocked: 'Tippe noch einmal auf den Orb, um die Audiowiedergabe zu erlauben.',
 };
 
-// Verstärkung der Agent-Stimme. Ein <audio>-Element ist auf 100 % gedeckelt,
-// daher läuft die Wiedergabe über einen Web-Audio-GainNode mit Faktor > 1.
-// Kräftige Vorverstärkung; ein Limiter kappt nur echte Spitzen (siehe unten).
-// Hoher Wert treibt das Signal in den Limiter -> deutlich lautere Wiedergabe.
-const AGENT_VOLUME_GAIN = 7.5;
+// Verstärkung der Agent-Stimme (linearer Faktor für LiveKit setVolume).
+// 1.0 = normal; > 1 verstärkt. An einen Web-Audio-Kontext gebundene
+// RemoteAudioTracks unterstützen Werte > 1. Hier feinjustieren.
+const AGENT_VOLUME_GAIN = 3.5;
 
 const AGENT_STATES = new Set([
   'connecting',
@@ -72,8 +71,6 @@ let intentionalDisconnect = false;
 let audioContext = null;
 let analyser = null;
 let analyserSource = null;
-let gainNode = null;
-let limiterNode = null;
 let animationFrame = null;
 let agentParticipantIdentity = null;
 let agentWaitTimer = null;
@@ -130,51 +127,43 @@ function stopVisualizer() {
   animationFrame = null;
   analyserSource?.disconnect();
   analyser?.disconnect();
-  gainNode?.disconnect();
-  limiterNode?.disconnect();
   analyserSource = null;
   analyser = null;
-  gainNode = null;
-  limiterNode = null;
   setAudioLevel(0);
 }
 
-// Verstärkter Wiedergabe- und Analyse-Graph über das <audio>-Element.
-// createMediaElementSource leitet die Wiedergabe des Elements in den WebAudio-
-// Graphen um (das Element gibt danach keinen Direktton mehr aus -> kein
-// Doppelton). Das ist zuverlässiger als createMediaStreamSource, das bei
-// entfernten WebRTC-Tracks je nach Browser stumm bleiben kann.
-async function setupAudioChain(audioElement) {
-  stopVisualizer();
-
-  audioContext ||= new AudioContext();
-  if (audioContext.state === 'suspended') {
-    await audioContext.resume().catch(() => {});
+// Lautstärke der Agent-Stimme über LiveKit selbst regeln: Wird der
+// RemoteAudioTrack an einen Web-Audio-Kontext gebunden, unterstützt setVolume
+// Verstärkung > 1 und LiveKit behandelt den entfernten WebRTC-Ton korrekt.
+// Das ist zuverlässiger als ein eigener Graph über <audio>, der je nach Browser
+// stumm bleibt oder (createMediaElementSource) ganz umgangen wird.
+async function boostAgentVolume(track) {
+  try {
+    audioContext ||= new AudioContext();
+    if (audioContext.state === 'suspended') await audioContext.resume().catch(() => {});
+    track.setAudioContext?.(audioContext);
+    track.setVolume?.(AGENT_VOLUME_GAIN);
+  } catch (error) {
+    console.warn('Lautstärke-Verstärkung nicht verfügbar:', error);
   }
+}
 
-  analyserSource = audioContext.createMediaElementSource(audioElement);
-
-  gainNode = audioContext.createGain();
-  gainNode.gain.value = AGENT_VOLUME_GAIN;
-  // Limiter dicht unter 0 dBFS: lässt die kräftige Vorverstärkung durch und
-  // kappt nur die lautesten Spitzen, statt das ganze Signal leiser zu machen.
-  limiterNode = audioContext.createDynamicsCompressor();
-  limiterNode.threshold.value = -1.5;
-  limiterNode.knee.value = 3;
-  limiterNode.ratio.value = 20;
-  limiterNode.attack.value = 0.002;
-  limiterNode.release.value = 0.2;
-
-  // Quelle -> Gain (> 1) -> Limiter -> Ausgabe (hörbar & verstärkt).
-  analyserSource.connect(gainNode);
-  gainNode.connect(limiterNode);
-  limiterNode.connect(audioContext.destination);
-
-  // Zusätzlicher Abgriff für die Pegel-Analyse (kein zweiter Ausgang).
-  analyser = audioContext.createAnalyser();
-  analyser.fftSize = 256;
-  analyser.smoothingTimeConstant = 0.82;
-  analyserSource.connect(analyser);
+// Reine Pegel-Analyse für die Orb-Animation – ohne Audio-Ausgang, damit der
+// von LiveKit gespielte Ton unberührt bleibt.
+function startAnalyser(track) {
+  stopVisualizer();
+  try {
+    audioContext ||= new AudioContext();
+    analyserSource = audioContext.createMediaStreamSource(
+      new MediaStream([track.mediaStreamTrack]),
+    );
+    analyser = audioContext.createAnalyser();
+    analyser.fftSize = 256;
+    analyser.smoothingTimeConstant = 0.82;
+    analyserSource.connect(analyser);
+  } catch (error) {
+    return; // Analyse ist optional; der Ton läuft weiter über LiveKit.
+  }
 
   const samples = new Uint8Array(analyser.fftSize);
   const tick = () => {
@@ -200,12 +189,8 @@ function attachAgentAudio(track) {
   document.body.appendChild(audioElement);
   attachedAudioElements.add(audioElement);
 
-  setupAudioChain(audioElement).catch((error) => {
-    // Fällt der verstärkte Graph aus, spielt das Element selbst (Normallautstärke).
-    console.warn('Audio-Verstärkung nicht verfügbar, Normallautstärke:', error);
-    audioElement.muted = false;
-    audioElement.volume = 1;
-  });
+  boostAgentVolume(track);
+  startAnalyser(track);
 }
 
 function detachAllAudio() {
