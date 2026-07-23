@@ -21,7 +21,8 @@ const UI_TEXT = {
 // Verstärkung der Agent-Stimme. Ein <audio>-Element ist auf 100 % gedeckelt,
 // daher läuft die Wiedergabe über einen Web-Audio-GainNode mit Faktor > 1.
 // Kräftige Vorverstärkung; ein Limiter kappt nur echte Spitzen (siehe unten).
-const AGENT_VOLUME_GAIN = 4.2;
+// Hoher Wert treibt das Signal in den Limiter -> deutlich lautere Wiedergabe.
+const AGENT_VOLUME_GAIN = 7.5;
 
 const AGENT_STATES = new Set([
   'connecting',
