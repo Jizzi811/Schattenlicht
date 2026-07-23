@@ -18,6 +18,10 @@ const UI_TEXT = {
   audioBlocked: 'Tippe noch einmal auf den Orb, um die Audiowiedergabe zu erlauben.',
 };
 
+// Verstärkung der Agent-Stimme. Ein <audio>-Element ist auf 100 % gedeckelt,
+// daher läuft die Wiedergabe über einen Web-Audio-GainNode mit Faktor > 1.
+const AGENT_VOLUME_GAIN = 2.8;
+
 const AGENT_STATES = new Set([
   'connecting',
   'pre-connect-buffering',
@@ -66,6 +70,8 @@ let intentionalDisconnect = false;
 let audioContext = null;
 let analyser = null;
 let analyserSource = null;
+let gainNode = null;
+let limiterNode = null;
 let animationFrame = null;
 let agentParticipantIdentity = null;
 let agentWaitTimer = null;
@@ -108,6 +114,19 @@ function setState(state, customText = null) {
 function setAudioLevel(level) {
   const clamped = Math.max(0, Math.min(1, level));
   orb.style.setProperty('--orb-level', clamped.toFixed(3));
+  // Für orb-visual.js (Canvas-Effekte) ohne teures getComputedStyle bereitstellen.
+  orb._orbLevel = clamped;
+}
+
+// Wiedergabe-Routing: Läuft der verstärkte Web-Audio-Pfad, wird das
+// <audio>-Element stummgeschaltet (nur der laute Pfad ist hörbar). Ist der
+// AudioContext blockiert, spielt das Element als Fallback in Normallautstärke.
+function applyPlaybackRouting() {
+  const webAudioActive = Boolean(gainNode) && audioContext?.state === 'running';
+  for (const element of attachedAudioElements) {
+    element.muted = webAudioActive;
+    element.volume = 1;
+  }
 }
 
 function clearAgentWaitTimer() {
@@ -120,8 +139,12 @@ function stopVisualizer() {
   animationFrame = null;
   analyserSource?.disconnect();
   analyser?.disconnect();
+  gainNode?.disconnect();
+  limiterNode?.disconnect();
   analyserSource = null;
   analyser = null;
+  gainNode = null;
+  limiterNode = null;
   setAudioLevel(0);
 }
 
@@ -140,6 +163,21 @@ async function startVisualizer(track) {
   analyser.fftSize = 256;
   analyser.smoothingTimeConstant = 0.82;
   analyserSource.connect(analyser);
+
+  // Verstärkter Wiedergabepfad: Quelle -> Gain (> 1) -> Limiter -> Ausgabe.
+  // Der Limiter (Kompressor) verhindert Übersteuern bei lauten Passagen.
+  gainNode = audioContext.createGain();
+  gainNode.gain.value = AGENT_VOLUME_GAIN;
+  limiterNode = audioContext.createDynamicsCompressor();
+  limiterNode.threshold.value = -8;
+  limiterNode.knee.value = 6;
+  limiterNode.ratio.value = 12;
+  limiterNode.attack.value = 0.003;
+  limiterNode.release.value = 0.25;
+  analyserSource.connect(gainNode);
+  gainNode.connect(limiterNode);
+  limiterNode.connect(audioContext.destination);
+  applyPlaybackRouting();
 
   const samples = new Uint8Array(analyser.fftSize);
   const tick = () => {
@@ -339,6 +377,8 @@ orb.addEventListener('click', async () => {
   try {
     if (room && currentState === 'audioBlocked') {
       await room.startAudio();
+      await audioContext?.resume().catch(() => {});
+      applyPlaybackRouting();
       setState(lastAgentState);
     } else if (room) {
       await stopConversation();

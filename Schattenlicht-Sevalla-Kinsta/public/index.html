@@ -215,10 +215,20 @@
       <h2 style="margin: 0 0 16px; font-family: 'Cormorant Garamond', serif; font-weight: 500; font-size: clamp(32px, 4.5vw, 54px); line-height: 1.04; color: #fff;">Ein Gespräch, das dich sieht</h2>
       <p style="margin: 0 auto 48px; max-width: 550px; font-size: 16px; line-height: 1.65; color: rgba(255,255,255,.6);">Berühre den Orb, um direkt mit Schattenlicht zu sprechen. Erst nach deinem Klick wird die Verbindung aufgebaut und dein Browser fragt nach der Mikrofonfreigabe.</p>
 
-      <div style="position: relative; width: 220px; height: 220px; margin: 0 auto 30px; display: flex; align-items: center; justify-content: center;">
-        <span aria-hidden="true" style="position: absolute; width: 180px; height: 180px; border-radius: 50%; border: 1px solid rgba(180,140,255,.24); animation: sl-ripple 3.2s ease-out infinite;"></span>
+      <div class="sl-orb-stage" style="position: relative; width: 260px; height: 260px; margin: 0 auto 34px; display: flex; align-items: center; justify-content: center;">
+        <span class="sl-orb-ripple" aria-hidden="true"></span>
+        <span class="sl-orb-ripple sl-orb-ripple--delay" aria-hidden="true"></span>
         <button id="schattenlicht-orb" class="sl-voice-orb" type="button" aria-label="Gespräch mit Schattenlicht beginnen" aria-pressed="false" data-state="ready">
-          <span class="sl-voice-orb-symbol" aria-hidden="true">◐</span>
+          <span class="sl-orb-aura" aria-hidden="true"></span>
+          <span class="sl-orb-shell" aria-hidden="true">
+            <canvas class="sl-orb-canvas" aria-hidden="true"></canvas>
+          </span>
+          <span class="sl-orb-sheen" aria-hidden="true"></span>
+          <span class="sl-voice-orb-fallback" aria-hidden="true"></span>
+          <span class="sl-orb-spark" aria-hidden="true"></span>
+          <span class="sl-orb-spark" aria-hidden="true"></span>
+          <span class="sl-orb-spark" aria-hidden="true"></span>
+          <span class="sl-orb-spark" aria-hidden="true"></span>
         </button>
       </div>
 
@@ -774,6 +784,8 @@ class Component extends DCLogic {
 }
 </script>
 
+<!-- Lebendiger Plasma-Orb: baut die visuellen Ebenen auf und reagiert audio-reaktiv. -->
+<script type="module" src="./orb-visual.js"></script>
 <!-- Eigene LiveKit-Integration: Der sichtbare Orb steuert die Sprachverbindung direkt. -->
 <script type="module" src="./orb-agent.js"></script>
 <script>
