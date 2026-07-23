@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Schattenlicht – Jungianische Selbsterkenntnis mit KI</title>
+<meta name="description" content="Schattenlicht begleitet dich bei jungianischer Selbstreflexion, Archetypen, Traumreflexion und dem Verständnis innerer Muster – ohne Diagnosen oder Heilversprechen.">
+<meta name="theme-color" content="#05060c">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,500&family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./orb.css">
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: #05060c; }
+  body { font-family: 'Manrope', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  a { color: #f5d79a; text-decoration: none; }
+  a:hover { color: #ffe9c2; }
+  @keyframes sl-spin { to { transform: rotateZ(360deg); } }
+  @keyframes sl-spin-rev { to { transform: rotateZ(-360deg); } }
+  @keyframes sl-beam { 0%,100% { opacity: .55; transform: translateX(-50%) scaleY(1); } 50% { opacity: 1; transform: translateX(-50%) scaleY(1.08); } }
+  @keyframes sl-breathe { 0%,100% { opacity: .5; } 50% { opacity: .95; } }
+  @keyframes sl-bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-14px); } }
+  @keyframes sl-sheen { 0% { transform: translateX(-140%) skewX(-18deg); } 60%,100% { transform: translateX(260%) skewX(-18deg); } }
+  @keyframes sl-cue { 0%,100% { transform: translateY(0); opacity: .4; } 50% { transform: translateY(9px); opacity: 1; } }
+  @media (max-height: 860px) { [data-scrollcue] { display: none !important; } }
+  @keyframes sl-rise { to { opacity: 1; transform: translateY(0); } }
+  @keyframes sl-travel { 0% { top: 0; opacity: 0; } 12% { opacity: 1; } 88% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
+  @keyframes sl-orb { 0%,100% { transform: scale(1); box-shadow: 0 0 60px 6px rgba(255,180,80,.45), 0 0 90px 12px rgba(140,90,255,.35); } 50% { transform: scale(1.04); box-shadow: 0 0 80px 10px rgba(255,180,80,.6), 0 0 120px 18px rgba(140,90,255,.5); } }
+  @keyframes sl-orb-fast { 0%,100% { transform: scale(1); } 50% { transform: scale(1.09); } }
+  @keyframes sl-hue { 0%,100% { filter: hue-rotate(0deg); } 50% { filter: hue-rotate(40deg); } }
+  @keyframes sl-modal-in { from { opacity: 0; transform: translateY(24px) scale(.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+  @keyframes sl-ripple { 0% { transform: scale(1); opacity: .5; } 100% { transform: scale(1.8); opacity: 0; } }
+
+  :focus-visible { outline: 2px solid #ffd889; outline-offset: 4px; }
+  @media (max-width: 900px) {
+    .sl-header nav { display: none !important; }
+    .sl-header { gap: 12px !important; }
+    .sl-hero-sphere { left: -150px !important; opacity: .58; }
+    .sl-hero-content { justify-content: center !important; }
+    .sl-hero-content > div { max-width: 680px !important; padding-top: 96px !important; }
+  }
+  @media (max-width: 560px) {
+    .sl-header { padding-left: 16px !important; padding-right: 16px !important; }
+    .sl-header > a:first-child span:last-child { font-size: 20px !important; }
+    .sl-header-cta { padding: 10px 14px !important; font-size: 12.5px !important; }
+    .sl-hero-sphere { left: -190px !important; width: 390px !important; opacity: .44; }
+    #top { min-height: 880px !important; }
+    .sl-hero-content > div { padding-bottom: 110px !important; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; }
+  }
+</style>
+</helmet>
+<div ref="{{ rootRef }}" style="position: relative; width: 100%; background: #05060c; color: rgba(255,255,255,.92); overflow-x: clip; --mx: 0; --my: 0; --sc: 0;">
+
+  <header class="sl-header" ref="{{ headerRef }}" style="position: fixed; top: 0; left: 0; right: 0; z-index: 60; display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 22px clamp(20px, 5vw, 64px); transition: padding .45s cubic-bezier(.22,1,.36,1), background .45s ease, backdrop-filter .45s ease, border-color .45s ease; border-bottom: 1px solid transparent;">
+    <a href="#top" style="display: flex; align-items: center; gap: 13px;">
+      <span style="position: relative; width: 30px; height: 30px; border-radius: 50%; background: linear-gradient(100deg, #ffc978 0 47%, #0c0a18 49% 51%, #8b5cf6 53% 100%); box-shadow: 0 0 18px rgba(255,180,80,.4), 0 0 22px rgba(139,92,246,.35); display: inline-block;"></span>
+      <span style="font-family: 'Cormorant Garamond', serif; font-size: 23px; font-weight: 600; letter-spacing: .04em; color: #fff;">Schattenlicht</span>
+    </a>
+    <nav aria-label="Hauptnavigation" style="display: flex; align-items: center; gap: clamp(14px, 2vw, 30px); font-size: 14.5px; font-weight: 500;">
+      <a href="#entdecken" style="color: rgba(255,255,255,.72); padding: 6px 2px; white-space: nowrap;" style-hover="{ color: '#fff' }">Entdecken</a>
+      <a href="#archetypen" style="color: rgba(255,255,255,.72); padding: 6px 2px; white-space: nowrap;" style-hover="{ color: '#fff' }">Archetypen</a>
+      <a href="#weg" style="color: rgba(255,255,255,.72); padding: 6px 2px; white-space: nowrap;" style-hover="{ color: '#fff' }">Dein Weg</a>
+      <a href="#ueber" style="color: rgba(255,255,255,.72); padding: 6px 2px; white-space: nowrap;" style-hover="{ color: '#fff' }">Über Schattenlicht</a>
+      <a href="#sicherheit" style="color: rgba(255,255,255,.72); padding: 6px 2px; white-space: nowrap;" style-hover="{ color: '#fff' }">Sicherheit</a>
+      <a href="#faq" style="color: rgba(255,255,255,.72); padding: 6px 2px; white-space: nowrap;" style-hover="{ color: '#fff' }">FAQ</a>
+    </nav>
+    <a class="sl-header-cta" href="#gespraech" style="position: relative; overflow: hidden; display: inline-flex; align-items: center; gap: 8px; padding: 11px 22px; border-radius: 999px; font-size: 14px; font-weight: 600; color: #1a1205; background: linear-gradient(100deg, #ffd27a, #f0a44b); box-shadow: 0 6px 22px rgba(240,164,75,.32); white-space: nowrap;" style-hover="{ boxShadow: '0 8px 28px rgba(240,164,75,.5)' }">Gespräch beginnen</a>
+  </header>
+
+  <section id="top" style="position: relative; min-height: 100svh; display: flex; align-items: center; overflow: hidden; isolation: isolate;">
+
+    <div aria-hidden="true" style="position: absolute; inset: 0; background: radial-gradient(130% 90% at 50% 30%, #0e1030 0%, #080814 45%, #04040a 100%);"></div>
+    <div aria-hidden="true" style="position: absolute; inset: 0; transform: translate3d(calc(var(--mx) * -18px), calc(var(--my) * -12px), 0); background: radial-gradient(60% 80% at 8% 62%, rgba(255,168,64,.34), transparent 60%), radial-gradient(58% 82% at 94% 42%, rgba(124,58,237,.34), transparent 62%), radial-gradient(40% 50% at 78% 80%, rgba(56,90,255,.22), transparent 65%);"></div>
+
+    <canvas ref="{{ canvasRef }}" aria-hidden="true" style="position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; transform: translate3d(calc(var(--mx) * 10px), calc(var(--my) * 8px), 0);"></canvas>
+
+    <div class="sl-hero-sphere" ref="{{ sphereRef }}" aria-hidden="true" style="position: absolute; z-index: 2; left: clamp(-120px, 12vw, 20%); top: 50%; width: clamp(340px, 42vw, 620px); aspect-ratio: 1; margin-top: calc(clamp(340px, 42vw, 620px) / -2); transform: translate3d(calc(var(--mx) * 22px), calc(var(--my) * 16px), 0) scale(calc(1 - var(--sc) * 0.16)); filter: brightness(calc(1 - var(--sc) * 0.55)); transition: filter .2s linear;">
+      <div style="position: absolute; inset: 0; animation: sl-bob 9s ease-in-out infinite;">
+        <div style="position: absolute; left: 50%; top: 50%; width: 2px; height: 165%; transform: translateX(-50%) translateY(-50%); background: linear-gradient(180deg, transparent, rgba(255,210,130,.85) 30%, rgba(190,150,255,.85) 70%, transparent); filter: blur(2px); animation: sl-beam 6s ease-in-out infinite; z-index: 3;"></div>
+        <sc-if value="{{ showOrbits }}" hint-placeholder-val="{{ true }}">
+          <div style="position: absolute; inset: -14%; transform: rotateX(74deg) rotateZ(8deg);"><div style="position: absolute; inset: 0; border-radius: 50%; border: 1px solid rgba(255,205,130,.28); animation: sl-spin 26s linear infinite;"><span style="position: absolute; top: -3px; left: 50%; width: 6px; height: 6px; margin-left: -3px; border-radius: 50%; background: #ffd889; box-shadow: 0 0 12px 3px rgba(255,200,120,.8);"></span></div></div>
+          <div style="position: absolute; inset: -26%; transform: rotateX(68deg) rotateZ(-24deg);"><div style="position: absolute; inset: 0; border-radius: 50%; border: 1px solid rgba(160,130,255,.26); animation: sl-spin-rev 38s linear infinite;"><span style="position: absolute; top: -3px; left: 50%; width: 5px; height: 5px; margin-left: -2.5px; border-radius: 50%; background: #c4b0ff; box-shadow: 0 0 12px 3px rgba(150,120,255,.8);"></span></div></div>
+          <div style="position: absolute; inset: -40%; transform: rotateX(78deg) rotateZ(40deg);"><div style="position: absolute; inset: 0; border-radius: 50%; border: 1px solid rgba(120,150,255,.18); animation: sl-spin 54s linear infinite;"><span style="position: absolute; top: -2.5px; left: 50%; width: 4px; height: 4px; margin-left: -2px; border-radius: 50%; background: #9fd0ff; box-shadow: 0 0 10px 3px rgba(90,140,255,.7);"></span></div></div>
+        </sc-if>
+        <div style="position: absolute; inset: 8%; border-radius: 50%; background: radial-gradient(120% 120% at 24% 30%, rgba(255,244,214,.95), rgba(255,176,72,.7) 26%, rgba(150,74,20,.35) 46%, transparent 55%), radial-gradient(120% 120% at 80% 72%, rgba(180,120,255,.75), rgba(74,58,190,.55) 34%, transparent 60%), linear-gradient(102deg, #ffc973 0%, #f2952f 40%, #17122e 49% 51%, #6c3ad6 60%, #362686 100%); box-shadow: 0 0 90px 6px rgba(255,170,70,.28), 0 0 120px 10px rgba(120,60,235,.26), inset 0 0 60px rgba(0,0,0,.5); animation: sl-breathe 8s ease-in-out infinite;">
+          <div style="position: absolute; inset: 0; border-radius: 50%; box-shadow: inset 0 0 3px 1.5px rgba(255,236,200,.5), inset 0 0 3px 1.5px rgba(198,160,255,.4);"></div>
+        </div>
+      </div>
+    </div>
+
+    <div style="position: absolute; inset: 0; z-index: 3; pointer-events: none; background: linear-gradient(90deg, transparent 30%, rgba(6,6,14,.35) 58%, rgba(6,6,14,.82) 100%);"></div>
+
+    <div class="sl-hero-content" style="position: relative; z-index: 4; width: 100%; max-width: 1320px; margin: 0 auto; padding: 0 clamp(20px, 5vw, 64px); display: flex; justify-content: flex-end;">
+      <div style="max-width: 560px; text-align: left; padding-top: 40px; padding-bottom: 64px;">
+        <p style="display: inline-flex; align-items: center; gap: 9px; margin: 0 0 22px; font-size: 12.5px; letter-spacing: .22em; text-transform: uppercase; color: #f2c987; font-weight: 600;"><span style="width: 26px; height: 1px; background: linear-gradient(90deg, transparent, #f2c987);"></span>Jungianische Selbsterkenntnis mit KI</p>
+        <h1 style="margin: 0; font-family: 'Cormorant Garamond', serif; font-weight: 500; font-size: clamp(48px, 7vw, 92px); line-height: .98; letter-spacing: -.01em; color: #fff;">Licht &amp; Schatten<br><span style="background: linear-gradient(100deg, #ffd27a 0%, #f4a24d 34%, #b58bff 70%, #8b6cff 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; font-style: italic;">in Balance</span></h1>
+        <p style="margin: 26px 0 0; font-size: clamp(16px, 1.5vw, 19px); line-height: 1.6; color: rgba(255,255,255,.74); max-width: 460px;">Erkenne deine inneren Muster. Verstehe deine verborgenen Anteile. Wachse zu einem vollständigeren Selbst.</p>
+        <div style="display: flex; flex-wrap: wrap; gap: 14px; margin-top: 38px;">
+          <a ref="{{ ctaRef }}" href="#gespraech" style="position: relative; overflow: hidden; display: inline-flex; align-items: center; gap: 10px; padding: 16px 30px; border-radius: 999px; font-size: 15.5px; font-weight: 600; color: #1a1205; background: linear-gradient(100deg, #ffd889, #f0a44b); box-shadow: 0 10px 34px rgba(240,164,75,.34); transition: transform .18s ease, box-shadow .3s ease; will-change: transform;" style-hover="{ boxShadow: '0 14px 44px rgba(240,164,75,.5)' }">
+            <span style="position: absolute; top: 0; left: 0; width: 40%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,.55), transparent); animation: sl-sheen 5.5s ease-in-out infinite;"></span>
+            <span style="position: relative;">Deine Reise beginnt jetzt</span>
+            <span style="position: relative; font-size: 18px;">→</span>
+          </a>
+          <a href="#archetypen" style="display: inline-flex; align-items: center; gap: 10px; padding: 16px 28px; border-radius: 999px; font-size: 15.5px; font-weight: 600; color: rgba(255,255,255,.9); border: 1px solid rgba(255,255,255,.2); background: rgba(255,255,255,.04); transition: border-color .3s ease, background .3s ease;" style-hover="{ borderColor: 'rgba(180,140,255,.6)', background: 'rgba(140,100,255,.1)' }">Archetypen entdecken</a>
+        </div>
+        <p style="margin: 30px 0 0; font-size: 13px; line-height: 1.55; color: rgba(255,255,255,.44); max-width: 420px;">Ein geschützter Raum für Reflexion – keine Diagnose und kein Ersatz für professionelle Behandlung.</p>
+      </div>
+    </div>
+
+    <a href="#weg" data-scrollcue aria-label="Nach unten scrollen" style="position: absolute; z-index: 5; bottom: 26px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 8px; font-size: 11px; letter-spacing: .2em; text-transform: uppercase; color: rgba(255,255,255,.4);">
+      Entdecken
+      <span style="width: 22px; height: 34px; border: 1px solid rgba(255,255,255,.3); border-radius: 12px; position: relative;"><span style="position: absolute; top: 6px; left: 50%; width: 3px; height: 6px; margin-left: -1.5px; border-radius: 2px; background: #f2c987; animation: sl-cue 1.8s ease-in-out infinite;"></span></span>
+    </a>
+  </section>
+
+  <section id="weg" style="position: relative; z-index: 10; padding: clamp(70px, 12vh, 130px) clamp(20px, 5vw, 64px) 120px; background: linear-gradient(180deg, #04040a, #070813); border-top: 1px solid rgba(255,255,255,.05);">
+    <div style="max-width: 1180px; margin: 0 auto;">
+      <p style="margin: 0 0 14px; font-size: 12px; letter-spacing: .22em; text-transform: uppercase; color: #b58bff; font-weight: 600;">Wähle deinen Weg</p>
+      <h2 style="margin: 0 0 48px; font-family: 'Cormorant Garamond', serif; font-weight: 500; font-size: clamp(30px, 4vw, 48px); line-height: 1.05; color: #fff; max-width: 620px;">Vier Pfade in deine innere Landschaft</h2>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 18px;">
+        <sc-for list="{{ paths }}" as="p" hint-placeholder-count="4">
+          <div style="opacity: 0; transform: translateY(24px); animation: sl-rise .7s cubic-bezier(.22,1,.36,1) forwards; position: relative; overflow: hidden; padding: 26px 24px 30px; border-radius: 18px; border: 1px solid rgba(255,255,255,.08); background: linear-gradient(160deg, rgba(255,255,255,.045), rgba(255,255,255,.01)); transition: border-color .35s ease, transform .35s ease;" style-hover="{ borderColor: 'rgba(200,160,255,.4)', transform: 'translateY(-4px)' }">
+            <div style="position: absolute; inset: 0; opacity: 0; background: radial-gradient(80% 60% at 20% 0%, rgba(255,180,80,.14), transparent 60%), radial-gradient(80% 70% at 90% 100%, rgba(140,100,255,.16), transparent 60%); transition: opacity .4s ease;" style-hover="{ opacity: 1 }"></div>
+            <div style="position: relative; font-size: 22px; color: #f2c987;">{{ p.icon }}</div>
+            <h3 style="position: relative; margin: 16px 0 8px; font-size: 18px; font-weight: 600; color: #fff;">{{ p.title }}</h3>
+            <p style="position: relative; margin: 0; font-size: 14px; line-height: 1.55; color: rgba(255,255,255,.6);">{{ p.desc }}</p>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </section>
+
+  <section id="archetypen" style="position: relative; z-index: 10; padding: clamp(80px, 12vh, 140px) clamp(20px, 5vw, 64px); background: #070813;">
+    <div style="max-width: 1180px; margin: 0 auto;">
+      <div style="text-align: center; max-width: 640px; margin: 0 auto 56px;">
+        <p style="margin: 0 0 14px; font-size: 12px; letter-spacing: .22em; text-transform: uppercase; color: #f2c987; font-weight: 600;">Die zwölf Archetypen</p>
+        <h2 style="margin: 0 0 16px; font-family: 'Cormorant Garamond', serif; font-weight: 500; font-size: clamp(32px, 4.5vw, 54px); line-height: 1.04; color: #fff;">Motive, die in dir wirken</h2>
+        <p style="margin: 0; font-size: 16px; line-height: 1.6; color: rgba(255,255,255,.6);">Wähle einen Archetyp und betrachte seine Stärken, sein Schattenpotenzial und seine zentrale Motivation – ganz ohne Diagnose.</p>
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr; gap: 40px; align-items: center; justify-items: center;">
+        <div style="position: relative; width: min(92vw, 500px); aspect-ratio: 1;">
+          <div aria-hidden="true" style="position: absolute; inset: 12%; border-radius: 50%; border: 1px solid rgba(255,255,255,.08);"></div>
+          <div aria-hidden="true" style="position: absolute; left: 50%; top: 50%; width: 46%; height: 46%; transform: translate(-50%,-50%); border-radius: 50%; background: radial-gradient(circle at 34% 32%, rgba(255,220,150,.9), rgba(240,150,60,.4) 40%, transparent 62%), radial-gradient(circle at 72% 74%, rgba(180,130,255,.7), transparent 60%), linear-gradient(102deg, #f0a840, #17122e 49% 51%, #7c3ad6); box-shadow: 0 0 60px rgba(255,170,70,.25), 0 0 80px rgba(120,60,235,.25); animation: sl-breathe 8s ease-in-out infinite;"></div>
+          <div style="position: absolute; left: 50%; top: 50%; width: 58%; text-align: center; transform: translate(-50%,-50%); padding: 0 6%; pointer-events: none;">
+            <div style="font-size: 30px; color: #ffd889; text-shadow: 0 0 18px rgba(255,190,90,.6);">{{ cur.symbol }}</div>
+            <div style="margin-top: 6px; font-family: 'Cormorant Garamond', serif; font-size: clamp(18px, 3vw, 26px); color: #fff; font-weight: 600;">{{ cur.name }}</div>
+          </div>
+          <sc-for list="{{ nodes }}" as="n" hint-placeholder-count="12">
+            <button type="button" onClick="{{ n.onClick }}" aria-label="{{ n.name }}" style="position: absolute; left: {{ n.left }}; top: {{ n.top }}; transform: translate(-50%,-50%); width: clamp(48px, 11vw, 66px); height: clamp(48px, 11vw, 66px); border-radius: 50%; border: 1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.04); color: rgba(255,255,255,.8); cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; transition: border-color .3s ease, background .3s ease, transform .3s ease; backdrop-filter: blur(4px);" style-hover="{ borderColor: 'rgba(255,205,130,.6)' }">
+              <span style="font-size: clamp(15px, 3vw, 20px); color: #f2c987;">{{ n.symbol }}</span>
+            </button>
+          </sc-for>
+        </div>
+        <div style="width: 100%; max-width: 620px; padding: 30px clamp(22px, 4vw, 40px); border-radius: 22px; border: 1px solid rgba(255,255,255,.08); background: linear-gradient(160deg, rgba(255,255,255,.05), rgba(255,255,255,.012));">
+          <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 22px;">
+            <span style="width: 46px; height: 46px; flex: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; color: #ffd889; background: radial-gradient(circle at 40% 35%, rgba(255,200,110,.25), transparent 70%); border: 1px solid rgba(255,205,130,.3);">{{ cur.symbol }}</span>
+            <h3 style="margin: 0; font-family: 'Cormorant Garamond', serif; font-size: 30px; font-weight: 600; color: #fff;">{{ cur.name }}</h3>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 20px;">
+            <div>
+              <p style="margin: 0 0 6px; font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: #f2c987; font-weight: 600;">Zentrale Motivation</p>
+              <p style="margin: 0; font-size: 14.5px; line-height: 1.5; color: rgba(255,255,255,.78);">{{ cur.motivation }}</p>
+            </div>
+            <div>
+              <p style="margin: 0 0 6px; font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: #9fd0ff; font-weight: 600;">Stärken</p>
+              <p style="margin: 0; font-size: 14.5px; line-height: 1.5; color: rgba(255,255,255,.78);">{{ cur.strengths }}</p>
+            </div>
+            <div>
+              <p style="margin: 0 0 6px; font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: #c4b0ff; font-weight: 600;">Mögliches Schattenpotenzial</p>
+              <p style="margin: 0; font-size: 14.5px; line-height: 1.5; color: rgba(255,255,255,.78);">{{ cur.shadow }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="text-align: center; margin-top: 40px;">
+        <button type="button" onClick="{{ openTest }}" style="display: inline-flex; align-items: center; gap: 10px; padding: 15px 30px; border-radius: 999px; font-family: 'Manrope', sans-serif; font-size: 15px; font-weight: 600; color: #1a1205; background: linear-gradient(100deg, #ffd889, #f0a44b); border: none; cursor: pointer; box-shadow: 0 10px 30px rgba(240,164,75,.3);">Archetypen-Test starten <span style="font-size: 17px;">→</span></button>
+        <p style="margin: 14px 0 0; font-size: 12.5px; color: rgba(255,255,255,.4);">Freiwillig · 24 oder 36 Fragen · jederzeit abbrechbar</p>
+      </div>
+    </div>
+  </section>
+
+  <section style="position: relative; z-index: 10; padding: clamp(80px, 12vh, 140px) clamp(20px, 5vw, 64px); background: linear-gradient(180deg, #070813, #05060e);">
+    <div style="max-width: 900px; margin: 0 auto;">
+      <div style="max-width: 620px; margin-bottom: 56px;">
+        <p style="margin: 0 0 14px; font-size: 12px; letter-spacing: .22em; text-transform: uppercase; color: #b58bff; font-weight: 600;">So funktioniert es</p>
+        <h2 style="margin: 0; font-family: 'Cormorant Garamond', serif; font-weight: 500; font-size: clamp(32px, 4.5vw, 54px); line-height: 1.04; color: #fff;">Drei Schritte in die Tiefe</h2>
+      </div>
+      <div style="position: relative; padding-left: clamp(40px, 7vw, 70px);">
+        <div aria-hidden="true" style="position: absolute; left: clamp(16px, 2.5vw, 26px); top: 8px; bottom: 8px; width: 2px; background: linear-gradient(180deg, rgba(255,205,130,.5), rgba(180,140,255,.5));"></div>
+        <div aria-hidden="true" style="position: absolute; left: clamp(13px, 2.5vw, 23px); top: 0; width: 8px; height: 8px; border-radius: 50%; background: #ffd889; box-shadow: 0 0 14px 4px rgba(255,190,90,.8); animation: sl-travel 6s ease-in-out infinite;"></div>
+        <sc-for list="{{ steps }}" as="st" hint-placeholder-count="3">
+          <div style="position: relative; padding: 0 0 clamp(38px, 6vw, 56px);">
+            <span style="position: absolute; left: calc(clamp(40px, 7vw, 70px) * -1); top: -6px; width: clamp(34px, 5.2vw, 52px); height: clamp(34px, 5.2vw, 52px); display: flex; align-items: center; justify-content: center; border-radius: 50%; font-family: 'Cormorant Garamond', serif; font-size: 22px; color: #ffd889; background: #0c0d1a; border: 1px solid rgba(255,205,130,.35); box-shadow: 0 0 22px rgba(255,180,80,.2);">{{ st.n }}</span>
+            <h3 style="margin: 0 0 8px; font-size: clamp(19px, 2.4vw, 24px); font-weight: 600; color: #fff;">{{ st.title }}</h3>
+            <p style="margin: 0; font-size: 15.5px; line-height: 1.6; color: rgba(255,255,255,.62); max-width: 560px;">{{ st.desc }}</p>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </section>
+
+  <section id="gespraech" style="position: relative; z-index: 10; padding: clamp(80px, 12vh, 140px) clamp(20px, 5vw, 64px); background: #05060e; overflow: hidden;">
+    <div aria-hidden="true" style="position: absolute; left: 50%; top: 40%; width: 700px; height: 700px; transform: translate(-50%,-50%); background: radial-gradient(circle, rgba(140,90,255,.12), transparent 62%); pointer-events: none;"></div>
+    <div style="position: relative; max-width: 760px; margin: 0 auto; text-align: center;">
+      <p style="margin: 0 0 14px; font-size: 12px; letter-spacing: .22em; text-transform: uppercase; color: #f2c987; font-weight: 600;">Sprich mit Schattenlicht</p>
+      <h2 style="margin: 0 0 16px; font-family: 'Cormorant Garamond', serif; font-weight: 500; font-size: clamp(32px, 4.5vw, 54px); line-height: 1.04; color: #fff;">Ein Gespräch, das dich sieht</h2>
+      <p style="margin: 0 auto 48px; max-width: 550px; font-size: 16px; line-height: 1.65; color: rgba(255,255,255,.6);">Berühre den Orb, um direkt mit Schattenlicht zu sprechen. Erst nach deinem Klick wird die Verbindung aufgebaut und dein Browser fragt nach der Mikrofonfreigabe.</p>
+
+      <div style="position: relative; width: 220px; height: 220px; margin: 0 auto 30px; display: flex; align-items: center; justify-content: center;">
+        <span aria-hidden="true" style="position: absolute; width: 180px; height: 180px; border-radius: 50%; border: 1px solid rgba(180,140,255,.24); animation: sl-ripple 3.2s ease-out infinite;"></span>
+        <button id="schattenlicht-orb" class="sl-voice-orb" type="button" aria-label="Gespräch mit Schattenlicht beginnen" aria-pressed="false" data-state="ready">
+          <span class="sl-voice-orb-symbol" aria-hidden="true">◐</span>
+        </button>
+      </div>
+
+      <div id="orb-status-pill" class="sl-voice-status" data-state="ready" role="status" aria-live="polite" style="display: inline-flex; align-items: center; gap: 10px; padding: 12px 19px; border-radius: 999px; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.1); color: rgba(255,255,255,.76); font-size: 14px;">
+        <span class="sl-voice-status-dot" aria-hidden="true" style="width: 8px; height: 8px; border-radius: 50%; background: #8ee6b1; box-shadow: 0 0 12px rgba(142,230,177,.7);"></span>
+        <span id="orb-status">Berühre den Orb, um das Gespräch zu beginnen.</span>
+      </div>
+      <p id="orb-help" style="margin: 24px auto 0; max-width: 560px; font-size: 12.5px; line-height: 1.6; color: rgba(255,255,255,.4);">Dein Mikrofon wird erst nach deinem Klick und deiner Browser-Bestätigung aktiviert.</p>
+    </div>
+  </section>
+
+  <section id="ueber" style="position: relative; z-index: 10; padding: clamp(80px, 12vh, 140px) clamp(20px, 5vw, 64px); background: linear-gradient(180deg, #05060e, #070813);">
+    <div style="max-width: 1120px; margin: 0 auto;">
+      <div style="max-width: 660px; margin-bottom: 50px;">
+        <p style="margin: 0 0 14px; font-size: 12px; letter-spacing: .22em; text-transform: uppercase; color: #b58bff; font-weight: 600;">Philosophie</p>
+        <h2 style="margin: 0 0 18px; font-family: 'Cormorant Garamond', serif; font-weight: 500; font-size: clamp(32px, 4.5vw, 54px); line-height: 1.04; color: #fff;">Licht, Schatten und Individuation</h2>
+        <p style="margin: 0; font-size: 16px; line-height: 1.65; color: rgba(255,255,255,.64);">Nach C. G. Jung wachsen wir, indem wir das Bewusste und das Verdrängte miteinander in Beziehung bringen. Individuation ist der Weg, ein vollständigeres Selbst zu werden – nicht perfekter, sondern ganzer.</p>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 18px;">
+        <sc-for list="{{ concepts }}" as="c" hint-placeholder-count="4">
+          <div style="padding: 26px 24px; border-radius: 18px; border: 1px solid rgba(255,255,255,.08); background: linear-gradient(160deg, rgba(255,255,255,.045), rgba(255,255,255,.01));">
+            <div style="font-size: 20px; color: #f2c987;">{{ c.icon }}</div>
+            <h3 style="margin: 14px 0 8px; font-size: 18px; font-weight: 600; color: #fff;">{{ c.title }}</h3>
+            <p style="margin: 0; font-size: 14px; line-height: 1.55; color: rgba(255,255,255,.6);">{{ c.desc }}</p>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </section>
+
+  <section id="weg-uebungen" style="position: relative; z-index: 10; padding: clamp(80px, 12vh, 130px) clamp(20px, 5vw, 64px); background: #070813;">
+    <div style="max-width: 1120px; margin: 0 auto;">
+      <div style="max-width: 620px; margin-bottom: 46px;">
+        <p style="margin: 0 0 14px; font-size: 12px; letter-spacing: .22em; text-transform: uppercase; color: #f2c987; font-weight: 600;">Reflexionsübungen</p>
+        <h2 style="margin: 0; font-family: 'Cormorant Garamond', serif; font-weight: 500; font-size: clamp(30px, 4vw, 48px); line-height: 1.05; color: #fff;">Kleine Praktiken für den Alltag</h2>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 18px;">
+        <sc-for list="{{ exercises }}" as="ex" hint-placeholder-count="3">
+          <div style="padding: 28px 26px; border-radius: 18px; border: 1px solid rgba(255,255,255,.08); background: linear-gradient(160deg, rgba(180,140,255,.06), rgba(255,255,255,.01));">
+            <p style="margin: 0 0 10px; font-size: 12px; letter-spacing: .16em; text-transform: uppercase; color: #c4b0ff; font-weight: 600;">{{ ex.tag }}</p>
+            <h3 style="margin: 0 0 10px; font-size: 19px; font-weight: 600; color: #fff;">{{ ex.title }}</h3>
+            <p style="margin: 0; font-size: 14.5px; line-height: 1.6; color: rgba(255,255,255,.62);">{{ ex.desc }}</p>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </section>
+
+  <section id="sicherheit" style="position: relative; z-index: 10; padding: clamp(80px, 12vh, 130px) clamp(20px, 5vw, 64px); background: linear-gradient(180deg, #070813, #05060e);">
+    <div style="max-width: 820px; margin: 0 auto; text-align: center;">
+      <p style="margin: 0 0 14px; font-size: 12px; letter-spacing: .22em; text-transform: uppercase; color: #9fd0ff; font-weight: 600;">Sicherheit &amp; Vertrauen</p>
+      <h2 style="margin: 0 0 24px; font-family: 'Cormorant Garamond', serif; font-weight: 500; font-size: clamp(30px, 4vw, 48px); line-height: 1.06; color: #fff;">Ein geschützter Raum – mit klaren Grenzen</h2>
+      <p style="margin: 0 auto; max-width: 640px; font-size: 16.5px; line-height: 1.7; color: rgba(255,255,255,.72);">Schattenlicht begleitet dich bei Selbstreflexion und persönlicher Entwicklung. Die Anwendung stellt keine medizinischen oder psychologischen Diagnosen und ersetzt keine Psychotherapie, psychiatrische Behandlung oder akute Krisenhilfe.</p>
+      <div style="display: inline-flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-top: 34px;">
+        <span style="padding: 9px 18px; border-radius: 999px; font-size: 13px; color: rgba(255,255,255,.7); background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.1);">Keine Diagnosen</span>
+        <span style="padding: 9px 18px; border-radius: 999px; font-size: 13px; color: rgba(255,255,255,.7); background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.1);">Keine Heilversprechen</span>
+        <span style="padding: 9px 18px; border-radius: 999px; font-size: 13px; color: rgba(255,255,255,.7); background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.1);">Freiwillige Teilnahme</span>
+        <span style="padding: 9px 18px; border-radius: 999px; font-size: 13px; color: rgba(255,255,255,.7); background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.1);">Daten in deiner Kontrolle</span>
+      </div>
+      <div id="krise" style="margin: 34px auto 0; max-width: 640px; padding: 22px 24px; border-radius: 16px; text-align: left; background: rgba(255,90,90,.07); border: 1px solid rgba(255,120,120,.24);">
+        <p style="margin: 0 0 8px; font-size: 14px; font-weight: 700; color: #ffd6d6;">Akute Krise in Deutschland</p>
+        <p style="margin: 0; font-size: 13.5px; line-height: 1.65; color: rgba(255,255,255,.66);">Bei unmittelbarer Gefahr rufe bitte <strong style="color:#fff;">112</strong> an. Die TelefonSeelsorge erreichst du rund um die Uhr unter <strong style="color:#fff;">116 123</strong>, <strong style="color:#fff;">0800 1110111</strong> oder <strong style="color:#fff;">0800 1110222</strong>. Bleib in einer akuten Situation möglichst nicht allein.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="faq" style="position: relative; z-index: 10; padding: clamp(80px, 12vh, 130px) clamp(20px, 5vw, 64px); background: #05060e;">
+    <div style="max-width: 780px; margin: 0 auto;">
+      <div style="text-align: center; margin-bottom: 46px;">
+        <p style="margin: 0 0 14px; font-size: 12px; letter-spacing: .22em; text-transform: uppercase; color: #f2c987; font-weight: 600;">Häufige Fragen</p>
+        <h2 style="margin: 0; font-family: 'Cormorant Garamond', serif; font-weight: 500; font-size: clamp(30px, 4vw, 48px); line-height: 1.05; color: #fff;">FAQ</h2>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <sc-for list="{{ faqs }}" as="f" hint-placeholder-count="5">
+          <div style="border: 1px solid rgba(255,255,255,.08); border-radius: 16px; background: rgba(255,255,255,.025); overflow: hidden;">
+            <button type="button" onClick="{{ f.toggle }}" aria-expanded="{{ f.open }}" style="width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 20px 24px; background: none; border: none; cursor: pointer; text-align: left; font-family: 'Manrope', sans-serif; font-size: 16px; font-weight: 600; color: #fff;">
+              {{ f.q }}
+              <sc-if value="{{ f.open }}" hint-placeholder-val="{{ false }}"><span style="color: #f2c987; font-size: 20px; flex: none;">−</span></sc-if>
+              <sc-if value="{{ f.closed }}" hint-placeholder-val="{{ true }}"><span style="color: rgba(255,255,255,.5); font-size: 20px; flex: none;">+</span></sc-if>
+            </button>
+            <sc-if value="{{ f.open }}" hint-placeholder-val="{{ false }}">
+              <p style="margin: 0; padding: 0 24px 22px; font-size: 15px; line-height: 1.6; color: rgba(255,255,255,.64);">{{ f.a }}</p>
+            </sc-if>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </section>
+
+  <section style="position: relative; z-index: 10; padding: clamp(90px, 14vh, 160px) clamp(20px, 5vw, 64px); background: radial-gradient(120% 100% at 50% 0%, #12102e 0%, #07081a 55%, #05060e 100%); text-align: center; overflow: hidden;">
+    <div aria-hidden="true" style="position: absolute; left: 50%; top: 0; width: 2px; height: 46%; transform: translateX(-50%); background: linear-gradient(180deg, rgba(255,210,130,.7), rgba(190,150,255,.7), transparent); filter: blur(1px); animation: sl-beam 6s ease-in-out infinite;"></div>
+    <div style="position: relative; max-width: 680px; margin: 0 auto;">
+      <h2 style="margin: 0 0 20px; font-family: 'Cormorant Garamond', serif; font-weight: 500; font-size: clamp(34px, 5vw, 62px); line-height: 1.02; color: #fff;">Deine Reise beginnt <span style="font-style: italic; background: linear-gradient(100deg, #ffd27a, #b58bff); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">jetzt</span></h2>
+      <p style="margin: 0 auto 36px; max-width: 480px; font-size: 16.5px; line-height: 1.6; color: rgba(255,255,255,.66);">Wende dich deinen inneren Mustern zu – behutsam, freiwillig und in deinem Tempo.</p>
+      <a href="#gespraech" style="display: inline-flex; align-items: center; gap: 10px; padding: 17px 36px; border-radius: 999px; font-size: 16px; font-weight: 600; color: #1a1205; background: linear-gradient(100deg, #ffd889, #f0a44b); box-shadow: 0 12px 40px rgba(240,164,75,.34);">Gespräch beginnen <span style="font-size: 18px;">→</span></a>
+    </div>
+  </section>
+
+  <footer style="position: relative; z-index: 10; padding: clamp(60px, 8vh, 90px) clamp(20px, 5vw, 64px) 40px; background: #04040a; border-top: 1px solid rgba(255,255,255,.06);">
+    <div style="max-width: 1180px; margin: 0 auto;">
+      <div style="display: grid; grid-template-columns: minmax(220px, 1.4fr) repeat(auto-fit, minmax(140px, 1fr)); gap: 40px 32px;">
+        <div>
+          <a href="#top" style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+            <span style="width: 26px; height: 26px; border-radius: 50%; background: linear-gradient(100deg, #ffc978 0 47%, #0c0a18 49% 51%, #8b5cf6 53% 100%); display: inline-block;"></span>
+            <span style="font-family: 'Cormorant Garamond', serif; font-size: 21px; font-weight: 600; color: #fff;">Schattenlicht</span>
+          </a>
+          <p style="margin: 0; max-width: 300px; font-size: 13.5px; line-height: 1.6; color: rgba(255,255,255,.5);">Jungianische Selbsterkenntnis mit KI. Ein geschützter Raum für Reflexion und Wachstum.</p>
+        </div>
+        <div>
+          <p style="margin: 0 0 14px; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: rgba(255,255,255,.4);">Entdecken</p>
+          <div style="display: flex; flex-direction: column; gap: 10px; font-size: 14px;">
+            <a href="#archetypen" style="color: rgba(255,255,255,.66);">Archetypen</a>
+            <a href="#weg" style="color: rgba(255,255,255,.66);">Dein Weg</a>
+            <a href="#gespraech" style="color: rgba(255,255,255,.66);">Gespräch beginnen</a>
+          </div>
+        </div>
+        <div>
+          <p style="margin: 0 0 14px; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: rgba(255,255,255,.4);">Mehr</p>
+          <div style="display: flex; flex-direction: column; gap: 10px; font-size: 14px;">
+            <a href="#ueber" style="color: rgba(255,255,255,.66);">Über Schattenlicht</a>
+            <a href="#sicherheit" style="color: rgba(255,255,255,.66);">Sicherheit</a>
+            <a href="#faq" style="color: rgba(255,255,255,.66);">FAQ</a>
+          </div>
+        </div>
+        <div>
+          <p style="margin: 0 0 14px; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: rgba(255,255,255,.4);">Hilfe</p>
+          <a href="#krise" style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 10px; font-size: 14px; font-weight: 600; color: #ffd9d9; background: rgba(255,90,90,.1); border: 1px solid rgba(255,120,120,.35);">✦ Hilfe in einer Krise</a>
+        </div>
+      </div>
+      <div style="margin-top: 44px; padding-top: 24px; border-top: 1px solid rgba(255,255,255,.06); display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; align-items: center;">
+        <p style="margin: 0; font-size: 12.5px; color: rgba(255,255,255,.4);">© 2026 Schattenlicht · Kein Ersatz für professionelle Behandlung.</p>
+        <div style="display: flex; gap: 20px; font-size: 12.5px;">
+          <span style="color: rgba(255,255,255,.35);">Datenschutz ergänzen</span>
+          <span style="color: rgba(255,255,255,.35);">Impressum ergänzen</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <sc-if value="{{ testOpen }}" hint-placeholder-val="{{ false }}">
+    <div role="dialog" aria-modal="true" aria-label="Archetypen-Test" style="position: fixed; inset: 0; z-index: 100; display: flex; align-items: center; justify-content: center; padding: 20px; background: rgba(4,4,10,.82); backdrop-filter: blur(10px);">
+      <div style="position: relative; width: 100%; max-width: 640px; max-height: 90vh; overflow-y: auto; border-radius: 24px; border: 1px solid rgba(255,255,255,.1); background: linear-gradient(160deg, #12122a, #0a0a18); box-shadow: 0 30px 90px rgba(0,0,0,.6); animation: sl-modal-in .4s cubic-bezier(.22,1,.36,1); padding: clamp(24px, 4vw, 40px);">
+        <button type="button" onClick="{{ closeTest }}" aria-label="Schließen" style="position: absolute; top: 18px; right: 18px; width: 36px; height: 36px; border-radius: 50%; border: 1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.04); color: rgba(255,255,255,.7); font-size: 18px; cursor: pointer;">×</button>
+
+        <sc-if value="{{ testIntro }}" hint-placeholder-val="{{ true }}">
+          <div>
+            <p style="margin: 0 0 10px; font-size: 12px; letter-spacing: .2em; text-transform: uppercase; color: #f2c987; font-weight: 600;">Archetypen-Test</p>
+            <h3 style="margin: 0 0 14px; font-family: 'Cormorant Garamond', serif; font-size: 30px; font-weight: 600; color: #fff;">Wie ausführlich möchtest du?</h3>
+            <p style="margin: 0 0 28px; font-size: 15px; line-height: 1.6; color: rgba(255,255,255,.62);">Bewerte Aussagen auf einer Skala von 1 (trifft nicht zu) bis 5 (trifft völlig zu). Freiwillig, jederzeit abbrechbar – keine Diagnose.</p>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 28px;">
+              <button type="button" onClick="{{ setVer24 }}" style="padding: 22px; border-radius: 16px; cursor: pointer; text-align: left; background: rgba(255,255,255,.03); font-family: 'Manrope', sans-serif; border: 1px solid {{ ver24border }}; color: #fff;">
+                <div style="font-size: 26px; font-family: 'Cormorant Garamond', serif; color: #ffd889;">24</div>
+                <div style="font-size: 13px; color: rgba(255,255,255,.6); margin-top: 4px;">Fragen · ca. 5 Min</div>
+              </button>
+              <button type="button" onClick="{{ setVer36 }}" style="padding: 22px; border-radius: 16px; cursor: pointer; text-align: left; background: rgba(255,255,255,.03); font-family: 'Manrope', sans-serif; border: 1px solid {{ ver36border }}; color: #fff;">
+                <div style="font-size: 26px; font-family: 'Cormorant Garamond', serif; color: #c4b0ff;">36</div>
+                <div style="font-size: 13px; color: rgba(255,255,255,.6); margin-top: 4px;">Fragen · ca. 8 Min</div>
+              </button>
+            </div>
+            <button type="button" onClick="{{ beginTest }}" style="width: 100%; padding: 15px; border-radius: 12px; border: none; cursor: pointer; font-family: 'Manrope', sans-serif; font-size: 15px; font-weight: 600; color: #1a1205; background: linear-gradient(100deg, #ffd889, #f0a44b);">Test beginnen</button>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ testQuestions }}" hint-placeholder-val="{{ false }}">
+          <div>
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 8px;">
+              <p style="margin: 0; font-size: 13px; font-weight: 600; color: rgba(255,255,255,.7);">Schritt {{ stepNum }} / {{ totalSteps }}</p>
+              <p style="margin: 0; font-size: 13px; color: rgba(255,255,255,.45);">{{ answeredCount }} / {{ totalQuestions }} beantwortet</p>
+            </div>
+            <div style="height: 5px; border-radius: 3px; background: rgba(255,255,255,.08); overflow: hidden; margin-bottom: 26px;">
+              <div style="height: 100%; width: {{ progressPct }}; background: linear-gradient(90deg, #ffd27a, #b58bff); transition: width .35s ease;"></div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 22px;">
+              <sc-for list="{{ stepQuestions }}" as="q" hint-placeholder-count="6">
+                <div>
+                  <p style="margin: 0 0 12px; font-size: 15.5px; line-height: 1.5; color: rgba(255,255,255,.88);">{{ q.text }}</p>
+                  <div style="display: flex; gap: 8px;">
+                    <sc-for list="{{ q.scale }}" as="o" hint-placeholder-count="5">
+                      <button type="button" onClick="{{ o.set }}" aria-label="Bewertung {{ o.v }}" style="flex: 1; height: 42px; border-radius: 10px; cursor: pointer; font-family: 'Manrope', sans-serif; font-size: 15px; font-weight: 600; transition: all .2s ease; border: 1px solid {{ o.border }}; background: {{ o.bg }}; color: {{ o.color }};">{{ o.v }}</button>
+                    </sc-for>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+            <div style="display: flex; justify-content: space-between; gap: 12px; margin-top: 30px;">
+              <div style="display: flex; gap: 10px;">
+                <sc-if value="{{ showBack }}" hint-placeholder-val="{{ false }}">
+                  <button type="button" onClick="{{ testPrev }}" style="padding: 12px 22px; border-radius: 999px; cursor: pointer; font-family: 'Manrope', sans-serif; font-size: 14px; font-weight: 600; color: rgba(255,255,255,.8); background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.14);">Zurück</button>
+                </sc-if>
+                <button type="button" onClick="{{ cancelTest }}" style="padding: 12px 22px; border-radius: 999px; cursor: pointer; font-family: 'Manrope', sans-serif; font-size: 14px; font-weight: 500; color: rgba(255,255,255,.5); background: none; border: 1px solid rgba(255,255,255,.1);">Abbrechen</button>
+              </div>
+              <button type="button" onClick="{{ testNext }}" disabled="{{ nextDisabled }}" style="padding: 12px 28px; border-radius: 999px; cursor: pointer; font-family: 'Manrope', sans-serif; font-size: 14px; font-weight: 600; color: #1a1205; background: {{ nextBg }}; border: none; opacity: {{ nextOpacity }};">Weiter</button>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ testConfirm }}" hint-placeholder-val="{{ false }}">
+          <div style="text-align: center;">
+            <div style="font-size: 34px; color: #ffd889; margin-bottom: 6px;">◐</div>
+            <h3 style="margin: 0 0 12px; font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 600; color: #fff;">Bereit zum Auswerten?</h3>
+            <p style="margin: 0 auto 28px; max-width: 420px; font-size: 15px; line-height: 1.6; color: rgba(255,255,255,.62);">Du hast {{ answeredCount }} von {{ totalQuestions }} Aussagen bewertet. Deine Antworten werden zur Auswertung übermittelt – es entsteht kein diagnostisches Urteil.</p>
+            <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+              <button type="button" onClick="{{ testPrev }}" style="padding: 13px 24px; border-radius: 999px; cursor: pointer; font-family: 'Manrope', sans-serif; font-size: 14px; font-weight: 600; color: rgba(255,255,255,.8); background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.14);">Zurück</button>
+              <button type="button" onClick="{{ submitTest }}" disabled="{{ submitting }}" style="padding: 13px 30px; border-radius: 999px; cursor: pointer; font-family: 'Manrope', sans-serif; font-size: 14px; font-weight: 600; color: #1a1205; background: linear-gradient(100deg, #ffd889, #f0a44b); border: none;">{{ submitLabel }}</button>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ testResult }}" hint-placeholder-val="{{ false }}">
+          <div>
+            <p style="margin: 0 0 8px; font-size: 12px; letter-spacing: .2em; text-transform: uppercase; color: #f2c987; font-weight: 600;">Deine Tendenzen</p>
+            <h3 style="margin: 0 0 8px; font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 600; color: #fff;">Dein aktuelles Profil</h3>
+            <p style="margin: 0 0 24px; font-size: 13px; line-height: 1.55; color: rgba(255,255,255,.5);">Die Auswertung zeigt aktuelle archetypische Tendenzen zur Selbstreflexion. Sie ist keine psychologische oder medizinische Diagnose.</p>
+            <div style="margin-bottom: 22px;">
+              <p style="margin: 0 0 12px; font-size: 12px; letter-spacing: .16em; text-transform: uppercase; color: #ffd889; font-weight: 600;">Am stärksten gelebt</p>
+              <sc-for list="{{ resultPrimary }}" as="r" hint-placeholder-count="3">
+                <div style="display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 12px; background: rgba(255,190,90,.07); border: 1px solid rgba(255,190,90,.2); margin-bottom: 8px;">
+                  <span style="font-size: 20px; color: #ffd889;">{{ r.symbol }}</span>
+                  <span style="flex: 1; font-size: 15px; font-weight: 600; color: #fff;">{{ r.name }}</span>
+                  <span style="font-size: 13px; color: rgba(255,255,255,.55);">{{ r.score }} / {{ r.max }}</span>
+                </div>
+              </sc-for>
+            </div>
+            <div style="margin-bottom: 28px;">
+              <p style="margin: 0 0 12px; font-size: 12px; letter-spacing: .16em; text-transform: uppercase; color: #c4b0ff; font-weight: 600;">Bisher wenig gelebt</p>
+              <sc-for list="{{ resultLess }}" as="r" hint-placeholder-count="3">
+                <div style="display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 12px; background: rgba(140,100,255,.07); border: 1px solid rgba(140,100,255,.2); margin-bottom: 8px;">
+                  <span style="font-size: 20px; color: #c4b0ff;">{{ r.symbol }}</span>
+                  <span style="flex: 1; font-size: 15px; font-weight: 600; color: #fff;">{{ r.name }}</span>
+                  <span style="font-size: 13px; color: rgba(255,255,255,.55);">{{ r.score }} / {{ r.max }}</span>
+                </div>
+              </sc-for>
+            </div>
+            <button type="button" onClick="{{ closeTest }}" style="width: 100%; padding: 15px; border-radius: 12px; border: none; cursor: pointer; font-family: 'Manrope', sans-serif; font-size: 15px; font-weight: 600; color: #1a1205; background: linear-gradient(100deg, #ffd889, #f0a44b);">Schließen</button>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:&quot;100%&quot;,&quot;height&quot;:760},&quot;showOrbits&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Bewegung&quot;},&quot;particles&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Bewegung&quot;},&quot;particleDensity&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:1,&quot;min&quot;:0.3,&quot;max&quot;:1.6,&quot;step&quot;:0.1,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Bewegung&quot;}}">
+class Component extends DCLogic {
+  state = { arch: 5, faq: -1, testOpen: false, testVer: 24, testStep: 0, testPhase: 'intro', answers: {}, result: null, submitting: false };
+  ARCH = [
+    { code: 'UN', name: 'Unschuldiger', symbol: '○', motivation: 'Sicherheit, Vertrauen und ein Leben im Einklang.', strengths: 'Optimismus, Offenheit, Hoffnungskraft.', shadow: 'Verdrängung, Naivität, Flucht vor der Realität.', q: ['Ich vertraue darauf, dass sich die Dinge zum Guten wenden.', 'Ich sehne mich nach Harmonie und Unbeschwertheit.', 'Ich meide bewusst alles, was zu schwer oder düster wirkt.'] },
+    { code: 'EN', name: 'Entdecker', symbol: '✦', motivation: 'Freiheit, Aufbruch und authentische Erfahrung.', strengths: 'Neugier, Mut, Unabhängigkeit.', shadow: 'Rastlosigkeit, Bindungsangst, Ziellosigkeit.', q: ['Ich fühle mich lebendig, wenn ich Neues erkunde.', 'Enge Routinen empfinde ich schnell als Einschränkung.', 'Ich breche lieber auf, als mich früh festzulegen.'] },
+    { code: 'WE', name: 'Weiser', symbol: '◉', motivation: 'Wahrheit, Erkenntnis und tiefes Verstehen.', strengths: 'Klarheit, Weitblick, Reflexion.', shadow: 'Grübeln, Distanz, Überkritik.', q: ['Ich will die Dinge wirklich durchdringen und verstehen.', 'Bevor ich handle, ordne ich meine Gedanken.', 'Manchmal denke ich mehr, als ich fühle oder tue.'] },
+    { code: 'HE', name: 'Held', symbol: '◆', motivation: 'Meisterschaft, Mut und das Überwinden von Widerstand.', strengths: 'Willenskraft, Disziplin, Einsatz.', shadow: 'Härte, Erschöpfung, ständiger Konkurrenzdruck.', q: ['Herausforderungen spornen mich an.', 'Ich gebe nicht auf, bevor ein Ziel erreicht ist.', 'Ich messe mich gern mit anderen.'] },
+    { code: 'RE', name: 'Rebell', symbol: '⚡', motivation: 'Veränderung, Freiheit von Zwängen und Echtheit.', strengths: 'Mut zum Bruch, Ehrlichkeit, Wandel.', shadow: 'Zerstörung, Trotz, Isolation.', q: ['Ich hinterfrage Regeln, die mir sinnlos erscheinen.', 'Ich spreche aus, was andere sich nicht trauen.', 'Widerstand reizt mich mehr als Anpassung.'] },
+    { code: 'MA', name: 'Magier', symbol: '✧', motivation: 'Transformation, Wirkung und das Verbinden von Welten.', strengths: 'Vision, Intuition, Wandlungskraft.', shadow: 'Manipulation, Kontrollstreben, Selbstüberhöhung.', q: ['Ich spüre Zusammenhänge, die andere übersehen.', 'Ich möchte etwas grundlegend verwandeln.', 'Ich vertraue meiner Intuition stark.'] },
+    { code: 'LI', name: 'Liebender', symbol: '♡', motivation: 'Nähe, Verbundenheit und tiefe Beziehung.', strengths: 'Empathie, Hingabe, Wärme.', shadow: 'Abhängigkeit, Verlustangst, Selbstverlust.', q: ['Beziehungen sind das Zentrum meines Lebens.', 'Ich spüre die Gefühle anderer sehr deutlich.', 'Nähe ist mir wichtiger, als recht zu haben.'] },
+    { code: 'NA', name: 'Narr', symbol: '✺', motivation: 'Lebensfreude, Präsenz und Leichtigkeit.', strengths: 'Humor, Spontaneität, Gegenwärtigkeit.', shadow: 'Ablenkung, Vermeidung, Oberflächlichkeit.', q: ['Ich nehme mich selbst nicht zu ernst.', 'Mit Humor entschärfe ich schwierige Momente.', 'Ich lebe lieber jetzt als in der Zukunft.'] },
+    { code: 'FU', name: 'Fürsorglicher', symbol: '❦', motivation: 'Schutz, Fürsorge und das Wohl anderer.', strengths: 'Mitgefühl, Verlässlichkeit, Großzügigkeit.', shadow: 'Selbstaufgabe, Kontrolle, Erschöpfung.', q: ['Ich sorge oft zuerst für andere.', 'Es fällt mir schwer, um Hilfe zu bitten.', 'Ich fühle mich verantwortlich für das Wohl anderer.'] },
+    { code: 'SC', name: 'Schöpfer', symbol: '✱', motivation: 'Ausdruck, Gestaltung und etwas Bleibendes erschaffen.', strengths: 'Fantasie, Originalität, Ausdruckskraft.', shadow: 'Perfektionismus, Selbstzweifel, Überforderung.', q: ['Ich möchte etwas Eigenes erschaffen.', 'Ohne kreativen Ausdruck fehlt mir etwas.', 'Ich strebe nach dem bestmöglichen Ergebnis.'] },
+    { code: 'HR', name: 'Herrscher', symbol: '♦', motivation: 'Ordnung, Verantwortung und souveräne Gestaltung.', strengths: 'Führung, Struktur, Übersicht.', shadow: 'Kontrolle, Starrheit, Dominanz.', q: ['Ich übernehme gern Verantwortung.', 'Klare Strukturen geben mir Sicherheit.', 'Ich möchte Situationen aktiv gestalten.'] },
+    { code: 'JE', name: 'Jedermann', symbol: '◇', motivation: 'Zugehörigkeit, Bodenständigkeit und echtes Miteinander.', strengths: 'Verbindlichkeit, Realismus, Empathie.', shadow: 'Anpassung, Selbstverleugnung, Mittelmaß.', q: ['Ich fühle mich in Gemeinschaft wohl.', 'Ich passe mich eher an, als aufzufallen.', 'Bodenständigkeit ist mir wichtig.'] }
+  ];
+  rootRef = React.createRef();
+  headerRef = React.createRef();
+  canvasRef = React.createRef();
+  sphereRef = React.createRef();
+  ctaRef = React.createRef();
+
+  componentDidMount() {
+    this.reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    this._cleanup = [];
+    this.setupParallax();
+    this.setupScroll();
+    this.setupMagnetic();
+    this.setupCanvas();
+  }
+  componentWillUnmount() {
+    (this._cleanup || []).forEach(fn => fn());
+    if (this._raf) cancelAnimationFrame(this._raf);
+  }
+
+  setupParallax() {
+    const root = this.rootRef.current;
+    if (!root || this.reduce) return;
+    let tx = 0, ty = 0, cx = 0, cy = 0, running = false;
+    const loop = () => {
+      cx += (tx - cx) * 0.06; cy += (ty - cy) * 0.06;
+      root.style.setProperty('--mx', cx.toFixed(3));
+      root.style.setProperty('--my', cy.toFixed(3));
+      if (Math.abs(tx - cx) > 0.001 || Math.abs(ty - cy) > 0.001) { this._praf = requestAnimationFrame(loop); }
+      else running = false;
+    };
+    const onMove = (e) => {
+      tx = (e.clientX / window.innerWidth - 0.5) * 2;
+      ty = (e.clientY / window.innerHeight - 0.5) * 2;
+      this.pointer = { x: e.clientX, y: e.clientY };
+      if (!running) { running = true; this._praf = requestAnimationFrame(loop); }
+    };
+    window.addEventListener('mousemove', onMove, { passive: true });
+    this._cleanup.push(() => { window.removeEventListener('mousemove', onMove); if (this._praf) cancelAnimationFrame(this._praf); });
+  }
+
+  setupScroll() {
+    const root = this.rootRef.current, header = this.headerRef.current;
+    let ticking = false;
+    const apply = () => {
+      const y = window.scrollY || 0;
+      const vh = window.innerHeight || 800;
+      const sc = Math.min(1, y / vh);
+      if (root) root.style.setProperty('--sc', sc.toFixed(3));
+      if (header) {
+        const compact = y > 40;
+        header.style.padding = compact ? '13px clamp(20px, 5vw, 64px)' : '22px clamp(20px, 5vw, 64px)';
+        header.style.background = compact ? 'rgba(6,7,15,.72)' : 'transparent';
+        header.style.backdropFilter = compact ? 'blur(14px)' : 'blur(0px)';
+        header.style.webkitBackdropFilter = compact ? 'blur(14px)' : 'blur(0px)';
+        header.style.borderBottomColor = compact ? 'rgba(255,255,255,.07)' : 'transparent';
+      }
+      ticking = false;
+    };
+    const onScroll = () => { if (!ticking) { ticking = true; requestAnimationFrame(apply); } };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    apply();
+    this._cleanup.push(() => window.removeEventListener('scroll', onScroll));
+  }
+
+  setupMagnetic() {
+    const el = this.ctaRef.current;
+    if (!el || this.reduce) return;
+    const onMove = (e) => {
+      const r = el.getBoundingClientRect();
+      const dx = e.clientX - (r.left + r.width / 2);
+      const dy = e.clientY - (r.top + r.height / 2);
+      el.style.transform = `translate(${dx * 0.18}px, ${dy * 0.28}px)`;
+    };
+    const onLeave = () => { el.style.transform = 'translate(0,0)'; };
+    el.addEventListener('mousemove', onMove);
+    el.addEventListener('mouseleave', onLeave);
+    this._cleanup.push(() => { el.removeEventListener('mousemove', onMove); el.removeEventListener('mouseleave', onLeave); });
+  }
+
+  setupCanvas() {
+    const canvas = this.canvasRef.current;
+    if (!canvas || this.props.particles === false) return;
+    const ctx = canvas.getContext('2d');
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    let w = 0, h = 0, parts = [];
+    const isMobile = window.innerWidth < 720;
+    const density = this.props.particleDensity ?? 1;
+    const base = this.reduce ? 34 : (isMobile ? 46 : 120);
+    const N = Math.round(base * density);
+    const rand = (a, b) => a + Math.random() * (b - a);
+    const build = () => {
+      parts = [];
+      for (let i = 0; i < N; i++) {
+        const left = Math.random() < 0.5;
+        parts.push({
+          x: left ? rand(0, w * 0.55) : rand(w * 0.45, w),
+          y: rand(0, h), r: rand(0.5, 2.1),
+          vx: rand(-0.08, 0.08), vy: rand(-0.28, -0.06),
+          a: rand(0.15, 0.7), tw: rand(0.004, 0.02), tp: rand(0, 6.28),
+          gold: left ? true : (Math.random() < 0.35 ? true : false)
+        });
+      }
+    };
+    const resize = () => {
+      w = canvas.clientWidth; h = canvas.clientHeight;
+      canvas.width = w * dpr; canvas.height = h * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      build();
+    };
+    resize();
+    window.addEventListener('resize', resize);
+    this._cleanup.push(() => window.removeEventListener('resize', resize));
+    const draw = () => {
+      ctx.clearRect(0, 0, w, h);
+      const p = this.pointer;
+      for (const s of parts) {
+        s.tp += s.tw;
+        const flick = 0.55 + 0.45 * Math.sin(s.tp);
+        s.x += s.vx; s.y += s.vy;
+        if (p) {
+          const dx = s.x - p.x, dy = s.y - p.y, d2 = dx * dx + dy * dy;
+          if (d2 < 14000 && d2 > 1) { const f = (14000 - d2) / 14000 * 0.6; s.x += dx / Math.sqrt(d2) * f; s.y += dy / Math.sqrt(d2) * f; }
+        }
+        if (s.y < -6) { s.y = h + 6; s.x = s.gold ? rand(0, w * 0.55) : rand(w * 0.45, w); }
+        if (s.x < -6) s.x = w + 6; if (s.x > w + 6) s.x = -6;
+        const col = s.gold ? '255,205,120' : (Math.random() < 0.5 ? '150,120,255' : '90,150,255');
+        ctx.beginPath();
+        ctx.fillStyle = `rgba(${s.gold ? '255,205,120' : (s.r > 1.4 ? '150,120,255' : '110,160,255')},${(s.a * flick).toFixed(3)})`;
+        ctx.arc(s.x, s.y, s.r, 0, 6.283);
+        ctx.fill();
+      }
+      if (!this.reduce) this._raf = requestAnimationFrame(draw);
+    };
+    draw();
+  }
+
+  selectArch(i) { this.setState({ arch: i }); }
+  toggleFaq(i) { this.setState(s => ({ faq: s.faq === i ? -1 : i })); }
+
+
+  buildQuestions(ver) {
+    const per = ver === 36 ? 3 : 2;
+    const out = [];
+    this.ARCH.forEach(a => { for (let i = 0; i < per; i++) out.push({ key: a.code + (i + 1), code: a.code, text: a.q[i] }); });
+    return out;
+  }
+  openTest() { this.setState({ testOpen: true, testPhase: 'intro', testStep: 0 }); }
+  closeTest() { this.setState({ testOpen: false }); }
+  cancelTest() {
+    if (Object.keys(this.state.answers).length && !window.confirm('Test abbrechen? Deine bisherigen Antworten bleiben lokal gespeichert.')) return;
+    this.setState({ testOpen: false });
+  }
+  setVer(v) { this.setState({ testVer: v }); }
+  beginTest() {
+    let saved = {};
+    try { saved = JSON.parse(localStorage.getItem('schattenlicht_test_v' + this.state.testVer) || '{}'); } catch (e) {}
+    this.setState({ testPhase: 'questions', testStep: 0, answers: saved });
+  }
+  rate(key, val) {
+    this.setState(s => {
+      const answers = { ...s.answers, [key]: val };
+      try { localStorage.setItem('schattenlicht_test_v' + s.testVer, JSON.stringify(answers)); } catch (e) {}
+      return { answers };
+    });
+  }
+  testNext() {
+    const total = Math.ceil(this.buildQuestions(this.state.testVer).length / 6);
+    if (this.state.testStep < total - 1) this.setState(s => ({ testStep: s.testStep + 1 }));
+    else this.setState({ testPhase: 'confirm' });
+  }
+  testPrev() {
+    if (this.state.testPhase === 'confirm') { this.setState({ testPhase: 'questions' }); return; }
+    if (this.state.testStep > 0) this.setState(s => ({ testStep: s.testStep - 1 }));
+  }
+  localResult() {
+    const scores = this.ARCH.map(a => {
+      const per = this.state.testVer === 36 ? 3 : 2;
+      let sum = 0; for (let i = 0; i < per; i++) sum += (this.state.answers[a.code + (i + 1)] || 0);
+      return { name: a.name, symbol: a.symbol, score: sum, max: per * 5 };
+    }).sort((x, y) => y.score - x.score);
+    return { primary: scores.slice(0, 3), less: scores.slice(-3).reverse() };
+  }
+  async submitTest() {
+    this.setState({ submitting: true });
+    const qs = this.buildQuestions(this.state.testVer);
+    const answers = qs.filter(q => this.state.answers[q.key]).map(q => q.key + ':' + this.state.answers[q.key]).join(',');
+    const body = { test_version: this.state.testVer, answers };
+    let result = this.localResult();
+    try {
+      const r = await fetch('/api/calculate-archetype-profile', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+      if (r.ok) { const j = await r.json(); if (j && j.result) result = j.result; }
+    } catch (e) {}
+    this.setState({ submitting: false, testPhase: 'result', result });
+  }
+
+  renderVals() {
+    const s = this.state;
+    const R = 40;
+    const nodes = this.ARCH.map((a, i) => {
+      const ang = (i / this.ARCH.length) * Math.PI * 2 - Math.PI / 2;
+      return { name: a.name, symbol: a.symbol, active: i === s.arch,
+        left: (50 + R * Math.cos(ang)).toFixed(2) + '%', top: (50 + R * Math.sin(ang)).toFixed(2) + '%',
+        onClick: () => this.selectArch(i) };
+    });
+    const cur = this.ARCH[s.arch];
+    const faqs = [
+      { q: 'Ist Schattenlicht eine Therapie?', a: 'Nein. Schattenlicht ist ein Werkzeug zur Selbstreflexion und persönlichen Entwicklung – kein Ersatz für Psychotherapie oder medizinische Behandlung.' },
+      { q: 'Werden meine Gespräche gespeichert?', a: 'Reflexionsinhalte bleiben in deiner Kontrolle. Der Archetypen-Test speichert Zwischenstände nur lokal in deinem Browser.' },
+      { q: 'Muss ich den Test machen?', a: 'Nein. Jeder Weg ist freiwillig. Du kannst jederzeit frei sprechen, ohne einen Test auszufüllen.' },
+      { q: 'Stellt der Agent Diagnosen?', a: 'Nein. Schattenlicht bietet Reflexionsfragen und Perspektiven, niemals Diagnosen oder Heilversprechen.' },
+      { q: 'Was passiert in einer Krise?', a: 'Schattenlicht ist keine Krisenhilfe. Im Footer findest du jederzeit den Link „Hilfe in einer Krise“ mit sofort erreichbaren Anlaufstellen.' }
+    ].map((f, i) => ({ ...f, open: s.faq === i, closed: s.faq !== i, toggle: () => this.toggleFaq(i) }));
+
+    const optStyle = (active) => active
+      ? { border: '1px solid rgba(255,205,130,.7)', bg: 'linear-gradient(100deg, rgba(255,210,130,.9), rgba(240,164,75,.9))', color: '#1a1205' }
+      : { border: '1px solid rgba(255,255,255,.14)', bg: 'rgba(255,255,255,.04)', color: 'rgba(255,255,255,.75)' };
+    const questions = this.buildQuestions(s.testVer);
+    const totalSteps = Math.ceil(questions.length / 6);
+    const stepQuestions = questions.slice(s.testStep * 6, s.testStep * 6 + 6).map(q => ({
+      key: q.key, text: q.text, value: s.answers[q.key] || 0,
+      scale: [1, 2, 3, 4, 5].map(v => { const st = optStyle(s.answers[q.key] === v); return { v, set: () => this.rate(q.key, v), border: st.border, bg: st.bg, color: st.color }; })
+    }));
+    const answeredCount = questions.filter(q => s.answers[q.key]).length;
+    const canAdvance = stepQuestions.every(q => q.value > 0);
+    const res = s.result || { primary: [], less: [] };
+
+    return {
+      rootRef: this.rootRef,
+      headerRef: this.headerRef,
+      canvasRef: this.canvasRef,
+      sphereRef: this.sphereRef,
+      ctaRef: this.ctaRef,
+      showOrbits: this.props.showOrbits ?? true,
+      nodes, cur,
+      faqs,
+      openTest: () => this.openTest(),
+      closeTest: () => this.closeTest(),
+      cancelTest: () => this.cancelTest(),
+      beginTest: () => this.beginTest(),
+      testOpen: s.testOpen,
+      testVer: s.testVer,
+      setVer24: () => this.setVer(24),
+      setVer36: () => this.setVer(36),
+      ver24active: s.testVer === 24,
+      ver36active: s.testVer === 36,
+      testIntro: s.testPhase === 'intro',
+      testQuestions: s.testPhase === 'questions',
+      testConfirm: s.testPhase === 'confirm',
+      testResult: s.testPhase === 'result',
+      testStep: s.testStep,
+      stepNum: s.testStep + 1,
+      totalSteps,
+      stepQuestions,
+      answeredCount,
+      totalQuestions: questions.length,
+      progressPct: ((answeredCount / questions.length) * 100).toFixed(0) + '%',
+      canAdvance,
+      showBack: s.testStep > 0,
+      testNext: () => this.testNext(),
+      testPrev: () => this.testPrev(),
+      submitTest: () => this.submitTest(),
+      submitting: s.submitting,
+      submitLabel: s.submitting ? 'Wird übermittelt …' : 'Auswerten',
+      nextDisabled: !canAdvance,
+      nextBg: canAdvance ? 'linear-gradient(100deg, #ffd889, #f0a44b)' : 'rgba(255,255,255,.14)',
+      nextOpacity: canAdvance ? '1' : '.5',
+      ver24border: s.testVer === 24 ? 'rgba(255,205,130,.7)' : 'rgba(255,255,255,.1)',
+      ver36border: s.testVer === 36 ? 'rgba(180,140,255,.7)' : 'rgba(255,255,255,.1)',
+      resultPrimary: res.primary,
+      resultLess: res.less,
+      steps: [
+        { n: '1', title: 'Erzähle, was dich bewegt', desc: 'Sprich über ein Thema, einen Konflikt oder eine Entscheidung – frei und in deinem Tempo.' },
+        { n: '2', title: 'Erkenne Muster und innere Dynamiken', desc: 'Schattenlicht spiegelt wiederkehrende Rollen, Trigger und verborgene Anteile wider.' },
+        { n: '3', title: 'Erhalte Reflexionsfragen und Schritte', desc: 'Du bekommst behutsame Fragen und konkrete nächste Schritte – niemals Diagnosen.' }
+      ],
+      concepts: [
+        { icon: '◐', title: 'Persona', desc: 'Die Maske, die wir der Welt zeigen – nützlich, aber nicht das ganze Selbst.' },
+        { icon: '☾', title: 'Schatten', desc: 'Das Verdrängte und Ungelebte, das im Verborgenen dennoch wirkt.' },
+        { icon: '⟁', title: 'Projektion', desc: 'Eigene Anteile, die wir unbewusst in anderen Menschen wiederfinden.' },
+        { icon: '◉', title: 'Selbst', desc: 'Der Kern der Ganzheit, um den sich Individuation ordnet.' }
+      ],
+      exercises: [
+        { tag: 'Abendritual', title: 'Der Spiegel des Tages', desc: 'Notiere eine Situation, die dich heute besonders berührt oder gereizt hat – und frage dich, was sie über dich verrät.' },
+        { tag: 'Schattenarbeit', title: 'Wen beneide ich?', desc: 'Bemerke, wen du bewunderst oder beneidest. Diese Gefühle zeigen oft ungelebte eigene Anteile.' },
+        { tag: 'Traumnotiz', title: 'Bilder der Nacht', desc: 'Halte ein wiederkehrendes Traumbild fest und betrachte es als Symbol, nicht als Vorhersage.' }
+      ],
+      paths: [
+        { icon: '❋', title: 'Freies Gespräch', desc: 'Sprich über ein Thema, einen Konflikt oder eine Entscheidung, die dich beschäftigt.' },
+        { icon: '◈', title: 'Archetypen-Test', desc: 'Entdecke freiwillig, welche archetypischen Motive dein aktuelles Leben besonders prägen.' },
+        { icon: '☾', title: 'Traumreflexion', desc: 'Betrachte Bilder, Gefühle und Symbole deiner Träume aus einer jungianischen Perspektive.' },
+        { icon: '⟁', title: 'Muster & Schatten', desc: 'Erforsche wiederkehrende Trigger, Rollen und bisher wenig gelebte Persönlichkeitsanteile.' }
+      ]
+    };
+  }
+}
+</script>
+
+<!-- Eigene LiveKit-Integration: Der sichtbare Orb steuert die Sprachverbindung direkt. -->
+<script type="module" src="./orb-agent.js"></script>
+<script>
+  window.setTimeout(function () {
+    var orb = document.getElementById('schattenlicht-orb');
+    var status = document.getElementById('orb-status');
+    var pill = document.getElementById('orb-status-pill');
+    if (orb && orb.dataset.agentBound !== 'true') {
+      orb.dataset.state = 'error';
+      orb.disabled = true;
+      if (pill) pill.setAttribute('data-state', 'error');
+      if (status) status.textContent = 'Die Sprachkomponente konnte nicht geladen werden. Bitte lade die Seite neu oder prüfe deinen Browser-Schutz.';
+    }
+  }, 20000);
+</script>
+</body>
+</html>

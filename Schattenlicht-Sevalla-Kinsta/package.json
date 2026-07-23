@@ -1,0 +1,20 @@
+{
+  "name": "schattenlicht-sevalla",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Schattenlicht Homepage mit integriertem LiveKit Voice-Orb für Sevalla Application Hosting.",
+  "scripts": {
+    "start": "node server.mjs",
+    "check": "node --check server.mjs && node --check public/orb-agent.js"
+  },
+  "dependencies": {
+    "@livekit/protocol": "1.48.0",
+    "express": "4.21.2",
+    "livekit-server-sdk": "2.15.3"
+  },
+  "engines": {
+    "node": "22.x"
+  },
+  "packageManager": "npm@10.9.2"
+}
