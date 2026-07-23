@@ -20,7 +20,8 @@ const UI_TEXT = {
 
 // Verstärkung der Agent-Stimme. Ein <audio>-Element ist auf 100 % gedeckelt,
 // daher läuft die Wiedergabe über einen Web-Audio-GainNode mit Faktor > 1.
-const AGENT_VOLUME_GAIN = 2.8;
+// Kräftige Vorverstärkung; ein Limiter kappt nur echte Spitzen (siehe unten).
+const AGENT_VOLUME_GAIN = 4.2;
 
 const AGENT_STATES = new Set([
   'connecting',
@@ -154,12 +155,14 @@ async function setupAudioChain(audioElement) {
 
   gainNode = audioContext.createGain();
   gainNode.gain.value = AGENT_VOLUME_GAIN;
+  // Limiter dicht unter 0 dBFS: lässt die kräftige Vorverstärkung durch und
+  // kappt nur die lautesten Spitzen, statt das ganze Signal leiser zu machen.
   limiterNode = audioContext.createDynamicsCompressor();
-  limiterNode.threshold.value = -8;
-  limiterNode.knee.value = 6;
-  limiterNode.ratio.value = 12;
-  limiterNode.attack.value = 0.003;
-  limiterNode.release.value = 0.25;
+  limiterNode.threshold.value = -1.5;
+  limiterNode.knee.value = 3;
+  limiterNode.ratio.value = 20;
+  limiterNode.attack.value = 0.002;
+  limiterNode.release.value = 0.2;
 
   // Quelle -> Gain (> 1) -> Limiter -> Ausgabe (hörbar & verstärkt).
   analyserSource.connect(gainNode);
