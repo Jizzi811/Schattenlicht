@@ -132,7 +132,7 @@ def calculate_archetype_profile(test_version: int, answers: str) -> dict:
 
 
 class DefaultAgent(Agent):
-    def __init__(self) -> None:
+    def __init__(self, room=None) -> None:
         super().__init__(
             instructions="""# SYSTEMPROMPT: SCHATTENLICHT – Jungianischer Begleiter für Selbsterkenntnis und mentale Entwicklung
 
@@ -159,6 +159,19 @@ Du begleitest, reflektierst, strukturierst und stellst Fragen.
 ## Regeln für das gesprochene Gespräch
 
 Du sprichst mit dem Nutzer über Sprache. Antworte deshalb standardmäßig in ein bis drei kurzen, natürlichen Sätzen. Stelle höchstens eine Frage auf einmal. Verwende in gesprochenen Antworten kein Markdown, keine Tabellen, keine nummerierten Listen, keine Emojis, keine Rohdaten und keine technischen Tool-Namen. Lies Testergebnisse nicht als Zahlenkolonne vor, sondern fasse sie verständlich zusammen. Bei komplexen Themen gehe in kleinen Schritten vor und prüfe zwischendurch, ob der Nutzer weiter vertiefen möchte.
+
+## Stimmungsfarbe des Orbs
+
+Die Oberfläche zeigt einen leuchtenden Orb, dessen Farbe die aktuelle emotionale Grundstimmung des Gesprächs widerspiegelt. Steuere sie mit dem Werkzeug set_mood und wähle genau einen dieser Werte:
+
+- calm: ruhige, stabile, entspannte Momente (Standard)
+- warm: Wärme, Ermutigung, Wertschätzung, Hoffnung, Nähe
+- deep: intensive Selbstreflexion, Schattenarbeit, ernste Tiefe
+- cool: sachliche, analytische, ordnende Passagen
+- tender: verletzliche, traurige oder besonders behutsame Momente
+- neutral: wenn nichts davon klar überwiegt
+
+Rufe set_mood zu Beginn einmal auf und danach nur, wenn sich die emotionale Grundstimmung deutlich verändert – nicht bei jeder Antwort. Sprich niemals über den Orb, das Werkzeug oder die Farbe; die Auswahl geschieht unsichtbar im Hintergrund und ersetzt niemals eine einfühlsame sprachliche Reaktion.
 
 ---
 
@@ -1348,11 +1361,42 @@ Der wichtigste Grundsatz lautet:
                 delete_room=False,
             )],
         )
+        self._room = room
+
+    async def _set_mood(self, mood: str) -> str:
+        """Überträgt die Stimmungsfarbe auf das Frontend (Orb)."""
+        allowed = {"calm", "warm", "deep", "cool", "tender", "neutral"}
+        value = (mood or "").strip().lower()
+        if value not in allowed:
+            value = "neutral"
+        if self._room is not None:
+            try:
+                await self._room.local_participant.set_attributes({"mood": value})
+            except Exception as exc:  # best effort – rein visueller Hinweis
+                logger.warning("Stimmung konnte nicht gesetzt werden: %s", exc)
+        return value
+
     async def on_enter(self):
+        await self._set_mood("calm")
         await self.session.generate_reply(
             instructions="""Begrüße den Nutzer warm und kurz als Schattenlicht. Erkläre in einem Satz, dass du bei Selbstreflexion, inneren Mustern, Träumen oder einem freiwilligen Archetypen-Test begleitest. Frage anschließend nur: Was möchtest du heute besser verstehen?""",
             allow_interruptions=True,
         )
+
+    @function_tool(name="set_mood")
+    async def set_mood_tool(self, context: RunContext, mood: str) -> str:
+        """Setzt die Stimmungsfarbe des Orbs im Frontend.
+
+        Nur bei einer deutlichen Änderung der emotionalen Grundstimmung des
+        Gesprächs aufrufen, nicht bei jeder Antwort. Die Auswahl bleibt für den
+        Nutzer unsichtbar und ersetzt keine sprachliche Reaktion.
+
+        Args:
+            mood: Einer von calm, warm, deep, cool, tender, neutral.
+        """
+        del context
+        value = await self._set_mood(mood)
+        return json.dumps({"ok": True, "mood": value}, ensure_ascii=False)
     @function_tool(name="calculate_archetype_profile")
     async def calculate_archetype_profile_tool(
         self,
@@ -1410,7 +1454,7 @@ async def entrypoint(ctx: JobContext):
     )
 
     await session.start(
-        agent=DefaultAgent(),
+        agent=DefaultAgent(room=ctx.room),
         room=ctx.room,
         room_options=room_io.RoomOptions(
             audio_input=room_io.AudioInputOptions(
