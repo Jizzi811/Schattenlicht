@@ -118,17 +118,6 @@ function setAudioLevel(level) {
   orb._orbLevel = clamped;
 }
 
-// Wiedergabe-Routing: Läuft der verstärkte Web-Audio-Pfad, wird das
-// <audio>-Element stummgeschaltet (nur der laute Pfad ist hörbar). Ist der
-// AudioContext blockiert, spielt das Element als Fallback in Normallautstärke.
-function applyPlaybackRouting() {
-  const webAudioActive = Boolean(gainNode) && audioContext?.state === 'running';
-  for (const element of attachedAudioElements) {
-    element.muted = webAudioActive;
-    element.volume = 1;
-  }
-}
-
 function clearAgentWaitTimer() {
   if (agentWaitTimer) window.clearTimeout(agentWaitTimer);
   agentWaitTimer = null;
@@ -148,7 +137,12 @@ function stopVisualizer() {
   setAudioLevel(0);
 }
 
-async function startVisualizer(track) {
+// Verstärkter Wiedergabe- und Analyse-Graph über das <audio>-Element.
+// createMediaElementSource leitet die Wiedergabe des Elements in den WebAudio-
+// Graphen um (das Element gibt danach keinen Direktton mehr aus -> kein
+// Doppelton). Das ist zuverlässiger als createMediaStreamSource, das bei
+// entfernten WebRTC-Tracks je nach Browser stumm bleiben kann.
+async function setupAudioChain(audioElement) {
   stopVisualizer();
 
   audioContext ||= new AudioContext();
@@ -156,16 +150,8 @@ async function startVisualizer(track) {
     await audioContext.resume().catch(() => {});
   }
 
-  analyserSource = audioContext.createMediaStreamSource(
-    new MediaStream([track.mediaStreamTrack]),
-  );
-  analyser = audioContext.createAnalyser();
-  analyser.fftSize = 256;
-  analyser.smoothingTimeConstant = 0.82;
-  analyserSource.connect(analyser);
+  analyserSource = audioContext.createMediaElementSource(audioElement);
 
-  // Verstärkter Wiedergabepfad: Quelle -> Gain (> 1) -> Limiter -> Ausgabe.
-  // Der Limiter (Kompressor) verhindert Übersteuern bei lauten Passagen.
   gainNode = audioContext.createGain();
   gainNode.gain.value = AGENT_VOLUME_GAIN;
   limiterNode = audioContext.createDynamicsCompressor();
@@ -174,10 +160,17 @@ async function startVisualizer(track) {
   limiterNode.ratio.value = 12;
   limiterNode.attack.value = 0.003;
   limiterNode.release.value = 0.25;
+
+  // Quelle -> Gain (> 1) -> Limiter -> Ausgabe (hörbar & verstärkt).
   analyserSource.connect(gainNode);
   gainNode.connect(limiterNode);
   limiterNode.connect(audioContext.destination);
-  applyPlaybackRouting();
+
+  // Zusätzlicher Abgriff für die Pegel-Analyse (kein zweiter Ausgang).
+  analyser = audioContext.createAnalyser();
+  analyser.fftSize = 256;
+  analyser.smoothingTimeConstant = 0.82;
+  analyserSource.connect(analyser);
 
   const samples = new Uint8Array(analyser.fftSize);
   const tick = () => {
@@ -202,7 +195,13 @@ function attachAgentAudio(track) {
   audioElement.style.display = 'none';
   document.body.appendChild(audioElement);
   attachedAudioElements.add(audioElement);
-  startVisualizer(track).catch(console.warn);
+
+  setupAudioChain(audioElement).catch((error) => {
+    // Fällt der verstärkte Graph aus, spielt das Element selbst (Normallautstärke).
+    console.warn('Audio-Verstärkung nicht verfügbar, Normallautstärke:', error);
+    audioElement.muted = false;
+    audioElement.volume = 1;
+  });
 }
 
 function detachAllAudio() {
@@ -394,7 +393,6 @@ orb.addEventListener('click', async () => {
     if (room && currentState === 'audioBlocked') {
       await room.startAudio();
       await audioContext?.resume().catch(() => {});
-      applyPlaybackRouting();
       setState(lastAgentState);
     } else if (room) {
       await stopConversation();
