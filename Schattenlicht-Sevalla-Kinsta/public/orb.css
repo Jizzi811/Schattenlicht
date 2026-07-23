@@ -99,14 +99,15 @@
 /* Zustände                                                            */
 /* ================================================================== */
 
-/* Speaking – der Orb belebt sich audio-reaktiv (Skalierung + Glow) */
+/* Speaking – der Orb belebt sich (sanftes Pulsieren + kräftigerer Glow).
+   Läuft rein über CSS, damit der Audio-Track für stabilen Ton nicht
+   zusätzlich angezapft werden muss. */
 .sl-voice-orb[data-state='speaking'] {
-  transform: scale(calc(1 + var(--orb-level) * 0.09));
+  animation: sl-orb-speak 1.2s ease-in-out infinite;
 }
 .sl-voice-orb[data-state='speaking'] .sl-orb-aura {
-  opacity: calc(0.7 + var(--orb-level) * 0.3);
-  transform: scale(calc(0.95 + var(--orb-level) * 0.22));
-  animation-duration: 2.6s;
+  opacity: 0.85;
+  animation-duration: 1.8s;
 }
 
 /* Listening – etwas kühlerer Glow */
@@ -177,6 +178,12 @@
 @keyframes sl-orb-blink {
   0%, 91%, 100% { opacity: 0; }
   93.5%, 96%    { opacity: 1; }
+}
+
+/* Sprech-Pulsieren (audio-unabhängig) */
+@keyframes sl-orb-speak {
+  0%, 100% { transform: scale(0.992); }
+  50%      { transform: scale(1.035); }
 }
 
 /* ================================================================== */

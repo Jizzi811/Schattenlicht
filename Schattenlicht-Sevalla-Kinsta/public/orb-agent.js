@@ -21,7 +21,7 @@ const UI_TEXT = {
 // Verstärkung der Agent-Stimme (linearer Faktor für LiveKit setVolume).
 // 1.0 = normal; > 1 verstärkt. An einen Web-Audio-Kontext gebundene
 // RemoteAudioTracks unterstützen Werte > 1. Hier feinjustieren.
-const AGENT_VOLUME_GAIN = 3.5;
+const AGENT_VOLUME_GAIN = 5.0;
 
 const AGENT_STATES = new Set([
   'connecting',
@@ -148,39 +148,6 @@ async function boostAgentVolume(track) {
   }
 }
 
-// Reine Pegel-Analyse für die Orb-Animation – ohne Audio-Ausgang, damit der
-// von LiveKit gespielte Ton unberührt bleibt.
-function startAnalyser(track) {
-  stopVisualizer();
-  try {
-    audioContext ||= new AudioContext();
-    analyserSource = audioContext.createMediaStreamSource(
-      new MediaStream([track.mediaStreamTrack]),
-    );
-    analyser = audioContext.createAnalyser();
-    analyser.fftSize = 256;
-    analyser.smoothingTimeConstant = 0.82;
-    analyserSource.connect(analyser);
-  } catch (error) {
-    return; // Analyse ist optional; der Ton läuft weiter über LiveKit.
-  }
-
-  const samples = new Uint8Array(analyser.fftSize);
-  const tick = () => {
-    if (!analyser) return;
-    analyser.getByteTimeDomainData(samples);
-    let squareSum = 0;
-    for (const sample of samples) {
-      const centered = (sample - 128) / 128;
-      squareSum += centered * centered;
-    }
-    const rms = Math.sqrt(squareSum / samples.length);
-    setAudioLevel(Math.min(1, rms * 4.5));
-    animationFrame = requestAnimationFrame(tick);
-  };
-  tick();
-}
-
 function attachAgentAudio(track) {
   const audioElement = track.attach();
   audioElement.autoplay = true;
@@ -189,8 +156,10 @@ function attachAgentAudio(track) {
   document.body.appendChild(audioElement);
   attachedAudioElements.add(audioElement);
 
+  // Bewusst KEIN zweiter MediaStreamSource-Abgriff auf denselben Track: Ein
+  // paralleler Web-Audio-Abgriff kann LiveKits Wiedergabe stören (Aussetzer).
+  // Die Orb-Belebung beim Sprechen läuft rein über CSS (siehe orb.css).
   boostAgentVolume(track);
-  startAnalyser(track);
 }
 
 function detachAllAudio() {
@@ -415,6 +384,14 @@ window.addEventListener('pagehide', () => {
   if (!room) return;
   intentionalDisconnect = true;
   room.disconnect().catch(() => {});
+});
+
+// Browser können den AudioContext (z. B. beim Tab-Wechsel) pausieren, was zu
+// Tonaussetzern führt. Beim Zurückkehren wieder aufwecken.
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && audioContext?.state === 'suspended') {
+    audioContext.resume().catch(() => {});
+  }
 });
 
 setState('ready');
