@@ -1,221 +1,266 @@
 /* =====================================================================
-   Schattenlicht Voice-Orb
-   Der Orb ist das vom Nutzer gelieferte Plasma-Bild (orb-plasma.png) mit
-   transparentem Hintergrund, sanft animiert (Drehen + Atmen) und
-   audio-reaktiv. Der Orb bleibt der zentrale Start-/Stop-Button.
-   Ebenen:
-     .sl-orb-aura     – äußerer, weicher Glow (audio-reaktiv)
-     .sl-orb-imgwrap  – Atem-Skalierung
-     .sl-orb-img      – das Plasma-Bild (dreht sich langsam)
-   Zustände laufen über [data-state], Audiopegel über --orb-level (0–1).
+   Schattenlicht Voice-Orb v6
+   Das vom Nutzer gelieferte Licht/Schatten-Motiv wird als transparente
+   SVG-Grafik eingebunden. Keine Vollrotation des Gesichts: Stattdessen
+   schweben, atmen und ein sehr leichtes Kippen. Die Reaktion auf die
+   Agent-Stimme läuft weiter über --orb-level (0–1).
    ===================================================================== */
 
 .sl-orb-stage {
-  --orb-accent: 190, 132, 255;   /* violett */
-  --orb-magenta: 216, 96, 245;   /* magenta */
-  --orb-pink: 236, 138, 255;     /* pink-violette Highlights */
+  --orb-gold: 255, 177, 52;
+  --orb-blue: 82, 142, 255;
+  --orb-violet: 157, 91, 255;
+  width: 382px !important;
+  height: 310px !important;
+  max-width: min(94vw, 382px);
 }
 
-/* Sanfte, sich ausdehnende Ringe um den Orb */
+/* Weiche, sich ausdehnende Energieringe. */
 .sl-orb-ripple {
   position: absolute;
-  width: 200px;
-  height: 200px;
+  width: 226px;
+  height: 226px;
   border-radius: 50%;
-  border: 1px solid rgba(var(--orb-accent), 0.22);
+  border: 1px solid rgba(var(--orb-gold), 0.22);
   pointer-events: none;
-  animation: sl-orb-ripple 4.6s ease-out infinite;
+  animation: sl-orb-ripple-v6 4.8s ease-out infinite;
 }
 .sl-orb-ripple--delay {
-  animation-delay: 2.3s;
-  border-color: rgba(var(--orb-magenta), 0.2);
+  animation-delay: 2.4s;
+  border-color: rgba(var(--orb-violet), 0.22);
 }
 
-/* ------------------------------------------------------------------ */
-/* Der Button selbst = zentrale Interaktionsfläche                     */
-/* ------------------------------------------------------------------ */
 .sl-voice-orb {
   --orb-level: 0;
   position: relative;
   display: grid;
   place-items: center;
-  width: 196px;
-  height: 196px;
+  width: 360px;
+  height: 285px;
+  max-width: 94vw;
   padding: 0;
   border: 0;
-  border-radius: 50%;
+  border-radius: 42%;
   background: transparent;
   cursor: pointer;
   appearance: none;
   isolation: isolate;
   -webkit-tap-highlight-color: transparent;
-  transform: scale(calc(1 + var(--orb-level) * 0.08));
-  transition: transform 110ms ease-out, filter 400ms ease, opacity 400ms ease;
+  transform: scale(calc(1 + var(--orb-level) * 0.055));
+  transition: transform 110ms ease-out, filter 350ms ease, opacity 350ms ease;
 }
 
 .sl-voice-orb:disabled { cursor: wait; }
 
 .sl-voice-orb:focus-visible {
-  outline: 2px solid #d9b8ff;
-  outline-offset: 14px;
+  outline: 2px solid #ffd98f;
+  outline-offset: 10px;
 }
 
 .sl-orb-aura,
-.sl-orb-imgwrap,
-.sl-orb-img {
+.sl-orb-imgwrap {
   position: absolute;
   pointer-events: none;
 }
 
-/* Äußerer Glow – hebt den Orb vom Hintergrund ab, reagiert auf den Pegel */
+/* Gold und Blau bleiben getrennt, damit Licht und Schatten klar wirken. */
 .sl-orb-aura {
-  inset: -34%;
+  inset: 6% 5%;
   border-radius: 50%;
   background:
-    radial-gradient(circle closest-side at 50% 50%, rgba(var(--orb-magenta), 0.4), rgba(var(--orb-accent), 0.28) 45%, transparent 74%);
-  filter: blur(26px);
-  opacity: calc(0.55 + var(--orb-level) * 0.4);
-  transform: scale(calc(0.9 + var(--orb-level) * 0.22));
-  transition: opacity 150ms linear, transform 150ms linear;
-  animation: sl-orb-aura 7s ease-in-out infinite;
+    radial-gradient(circle at 34% 49%, rgba(var(--orb-gold), 0.46), transparent 43%),
+    radial-gradient(circle at 68% 49%, rgba(var(--orb-blue), 0.42), transparent 44%),
+    radial-gradient(circle at 50% 52%, rgba(var(--orb-violet), 0.22), transparent 66%);
+  filter: blur(27px);
+  opacity: calc(0.62 + var(--orb-level) * 0.34);
+  transform: scale(calc(0.96 + var(--orb-level) * 0.18));
+  transition: opacity 120ms linear, transform 120ms linear;
+  animation: sl-orb-aura-v6 6.2s ease-in-out infinite;
   z-index: 0;
 }
 
-/* Atem-Skalierung */
+/* Das neue Motiv. Die bisherige PNG im HTML wird verdeckt, damit kein
+   zweites Bild geladen oder sichtbar wird. */
 .sl-orb-imgwrap {
-  inset: -6%;
-  display: block;
-  animation: sl-orb-breathe 6.5s ease-in-out infinite;
-  z-index: 1;
-}
-
-/* Das Plasma-Bild – dreht sich langsam, wird beim Sprechen heller */
-.sl-orb-img {
   inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  display: block;
-  user-select: none;
-  -webkit-user-drag: none;
-  filter: brightness(calc(1 + var(--orb-level) * 0.55)) saturate(calc(1 + var(--orb-level) * 0.25));
+  z-index: 1;
+  background: url("https://raw.githubusercontent.com/Jizzi811/Schattenlicht/ae3e3d28d9c544b043c2e2b933eb676d4ff42a0f/orb-schattenlicht.png") center / contain no-repeat;
+  filter:
+    brightness(calc(1.02 + var(--orb-level) * 0.34))
+    saturate(calc(1.03 + var(--orb-level) * 0.18))
+    drop-shadow(-12px 0 20px rgba(var(--orb-gold), 0.24))
+    drop-shadow(12px 0 20px rgba(var(--orb-blue), 0.22));
+  transform-origin: 50% 54%;
   transition: filter 120ms linear;
-  animation: sl-orb-spin 60s linear infinite;
+  animation: sl-orb-presence-v6 7.5s ease-in-out infinite;
 }
 
-.sl-voice-orb:hover .sl-orb-img { filter: brightness(1.08) saturate(1.06); }
-
-/* ================================================================== */
-/* Zustände                                                            */
-/* ================================================================== */
-
-/* Connecting / Initializing – etwas kräftigerer Glow, schnelleres Drehen */
-.sl-voice-orb[data-state='connecting'] .sl-orb-img,
-.sl-voice-orb[data-state='initializing'] .sl-orb-img {
-  animation-duration: 26s;
-}
-.sl-voice-orb[data-state='connecting'] .sl-orb-aura,
-.sl-voice-orb[data-state='initializing'] .sl-orb-aura {
-  animation-duration: 2.6s;
+.sl-orb-img {
+  display: none !important;
 }
 
-/* Listening – kühlerer, offener Glow */
-.sl-voice-orb[data-state='listening'] .sl-orb-aura {
+.sl-orb-imgwrap::after {
+  content: "";
+  position: absolute;
+  inset: 4% 12%;
+  border-radius: 50%;
+  background: linear-gradient(
+    112deg,
+    transparent 18%,
+    rgba(255, 244, 211, 0.06) 38%,
+    rgba(255, 255, 255, 0.34) 48%,
+    rgba(171, 204, 255, 0.08) 58%,
+    transparent 77%
+  );
+  mix-blend-mode: screen;
+  transform: translateX(-135%) skewX(-12deg);
+  animation: sl-orb-sheen-v6 7.8s ease-in-out infinite;
+}
+
+/* Zustände ----------------------------------------------------------- */
+
+.sl-voice-orb:hover .sl-orb-imgwrap {
+  filter:
+    brightness(1.09)
+    saturate(1.08)
+    drop-shadow(-13px 0 22px rgba(var(--orb-gold), 0.3))
+    drop-shadow(13px 0 22px rgba(var(--orb-blue), 0.28));
+}
+
+.sl-voice-orb[data-state="connecting"] .sl-orb-imgwrap,
+.sl-voice-orb[data-state="initializing"] .sl-orb-imgwrap {
+  animation-duration: 3.3s;
+}
+
+.sl-voice-orb[data-state="connecting"] .sl-orb-aura,
+.sl-voice-orb[data-state="initializing"] .sl-orb-aura {
+  animation-duration: 2.1s;
+}
+
+.sl-voice-orb[data-state="listening"] .sl-orb-aura {
   background:
-    radial-gradient(circle closest-side at 50% 50%, rgba(var(--orb-accent), 0.44), rgba(150, 190, 255, 0.32) 45%, transparent 76%);
+    radial-gradient(circle at 34% 49%, rgba(var(--orb-gold), 0.27), transparent 43%),
+    radial-gradient(circle at 68% 49%, rgba(116, 185, 255, 0.52), transparent 46%),
+    radial-gradient(circle at 50% 52%, rgba(var(--orb-violet), 0.23), transparent 68%);
 }
 
-/* Speaking – der ganze Orb bläht sich audio-reaktiv auf */
-.sl-voice-orb[data-state='speaking'] {
-  transform: scale(calc(1 + var(--orb-level) * 0.14));
-}
-.sl-voice-orb[data-state='speaking'] .sl-orb-aura {
-  opacity: calc(0.72 + var(--orb-level) * 0.28);
-  transform: scale(calc(0.95 + var(--orb-level) * 0.32));
-  animation-duration: 2.4s;
+.sl-voice-orb[data-state="thinking"] .sl-orb-imgwrap {
+  animation-name: sl-orb-thinking-v6;
+  animation-duration: 4.4s;
 }
 
-/* Disconnected – gedämpft */
-.sl-voice-orb[data-state='disconnected'] .sl-orb-img {
-  filter: saturate(0.7) brightness(0.85);
+.sl-voice-orb[data-state="speaking"] {
+  transform: scale(calc(1 + var(--orb-level) * 0.105));
+}
+.sl-voice-orb[data-state="speaking"] .sl-orb-aura {
+  opacity: calc(0.76 + var(--orb-level) * 0.22);
+  transform: scale(calc(0.98 + var(--orb-level) * 0.28));
+  animation-duration: 1.8s;
+}
+.sl-voice-orb[data-state="speaking"] .sl-orb-imgwrap {
+  filter:
+    brightness(calc(1.08 + var(--orb-level) * 0.42))
+    saturate(calc(1.08 + var(--orb-level) * 0.2))
+    drop-shadow(-14px 0 24px rgba(var(--orb-gold), 0.34))
+    drop-shadow(14px 0 24px rgba(var(--orb-blue), 0.32));
 }
 
-/* Error / Mikrofon verweigert – gedämpft, Glow rötlich */
-.sl-voice-orb[data-state='error'] .sl-orb-img,
-.sl-voice-orb[data-state='microphoneDenied'] .sl-orb-img {
-  filter: saturate(0.55) brightness(0.7) hue-rotate(-18deg);
-  animation-duration: 120s;
+.sl-voice-orb[data-state="disconnected"] .sl-orb-imgwrap {
+  filter: saturate(0.7) brightness(0.82);
+  opacity: 0.82;
 }
-.sl-voice-orb[data-state='error'] .sl-orb-aura,
-.sl-voice-orb[data-state='microphoneDenied'] .sl-orb-aura {
-  background:
-    radial-gradient(circle closest-side at 50% 50%, rgba(200, 70, 110, 0.34), transparent 66%);
+
+.sl-voice-orb[data-state="error"] .sl-orb-imgwrap,
+.sl-voice-orb[data-state="microphoneDenied"] .sl-orb-imgwrap {
+  filter: saturate(0.5) brightness(0.68) hue-rotate(-15deg);
+  opacity: 0.78;
+  animation-duration: 12s;
+}
+.sl-voice-orb[data-state="error"] .sl-orb-aura,
+.sl-voice-orb[data-state="microphoneDenied"] .sl-orb-aura {
+  background: radial-gradient(circle, rgba(214, 71, 105, 0.4), transparent 66%);
   animation: none;
 }
 
-/* Status-Pill Punktfarben je Zustand */
-.sl-voice-status[data-state='connecting'] .sl-voice-status-dot,
-.sl-voice-status[data-state='initializing'] .sl-voice-status-dot,
-.sl-voice-status[data-state='listening'] .sl-voice-status-dot {
-  background: #b58bff !important;
-  box-shadow: 0 0 12px rgba(181, 139, 255, 0.75) !important;
+/* Status-Pill -------------------------------------------------------- */
+
+.sl-voice-status[data-state="connecting"] .sl-voice-status-dot,
+.sl-voice-status[data-state="initializing"] .sl-voice-status-dot,
+.sl-voice-status[data-state="listening"] .sl-voice-status-dot {
+  background: #8fcaff !important;
+  box-shadow: 0 0 12px rgba(106, 181, 255, 0.8) !important;
 }
-.sl-voice-status[data-state='thinking'] .sl-voice-status-dot {
-  background: #8ea6ff !important;
-  box-shadow: 0 0 12px rgba(142, 166, 255, 0.7) !important;
+.sl-voice-status[data-state="thinking"] .sl-voice-status-dot {
+  background: #b798ff !important;
+  box-shadow: 0 0 12px rgba(183, 152, 255, 0.75) !important;
 }
-.sl-voice-status[data-state='speaking'] .sl-voice-status-dot {
-  background: #d860f5 !important;
-  box-shadow: 0 0 12px rgba(216, 96, 245, 0.8) !important;
+.sl-voice-status[data-state="speaking"] .sl-voice-status-dot {
+  background: #ffd177 !important;
+  box-shadow: 0 0 13px rgba(255, 190, 86, 0.85) !important;
 }
-.sl-voice-status[data-state='error'] .sl-voice-status-dot,
-.sl-voice-status[data-state='microphoneDenied'] .sl-voice-status-dot {
+.sl-voice-status[data-state="error"] .sl-voice-status-dot,
+.sl-voice-status[data-state="microphoneDenied"] .sl-voice-status-dot {
   background: #ff8c9a !important;
   box-shadow: 0 0 12px rgba(255, 120, 140, 0.7) !important;
 }
 
-/* ================================================================== */
-/* Keyframes                                                           */
-/* ================================================================== */
-@keyframes sl-orb-ripple {
-  0%   { transform: scale(0.9);  opacity: 0.5; }
-  100% { transform: scale(1.85); opacity: 0; }
+/* Animationen -------------------------------------------------------- */
+
+@keyframes sl-orb-ripple-v6 {
+  0%   { transform: scale(0.9); opacity: 0.5; }
+  100% { transform: scale(1.9); opacity: 0; }
 }
 
-@keyframes sl-orb-aura {
-  0%, 100% { opacity: 0.6; }
-  50%      { opacity: 0.9; }
+@keyframes sl-orb-aura-v6 {
+  0%, 100% { opacity: 0.58; transform: scale(0.96); }
+  50%      { opacity: 0.9; transform: scale(1.08); }
 }
 
-@keyframes sl-orb-breathe {
-  0%, 100% { transform: scale(1); }
-  50%      { transform: scale(1.035); }
+@keyframes sl-orb-presence-v6 {
+  0%, 100% { transform: translate3d(0, 3px, 0) scale(0.985) rotate(-0.7deg); }
+  50%      { transform: translate3d(0, -7px, 0) scale(1.025) rotate(0.7deg); }
 }
 
-@keyframes sl-orb-spin {
-  to { transform: rotate(360deg); }
+@keyframes sl-orb-thinking-v6 {
+  0%, 100% { transform: translate3d(-2px, 1px, 0) scale(0.99) rotate(-1deg); }
+  50%      { transform: translate3d(3px, -5px, 0) scale(1.02) rotate(1deg); }
 }
 
-/* ================================================================== */
-/* Responsiv                                                           */
-/* ================================================================== */
+@keyframes sl-orb-sheen-v6 {
+  0%, 20%   { transform: translateX(-135%) skewX(-12deg); opacity: 0; }
+  34%       { opacity: 0.68; }
+  50%, 100% { transform: translateX(145%) skewX(-12deg); opacity: 0; }
+}
+
+/* Responsiv ---------------------------------------------------------- */
+
 @media (max-width: 560px) {
-  .sl-orb-stage { width: 236px; height: 236px; }
-  .sl-voice-orb { width: 176px; height: 176px; }
-  .sl-orb-ripple { width: 180px; height: 180px; }
+  .sl-orb-stage {
+    width: 310px !important;
+    height: 258px !important;
+  }
+  .sl-voice-orb {
+    width: 298px;
+    height: 236px;
+  }
+  .sl-orb-ripple {
+    width: 184px;
+    height: 184px;
+  }
 }
 
-/* ================================================================== */
-/* Reduzierte Bewegung                                                 */
-/* ================================================================== */
+/* Barrierefreiheit --------------------------------------------------- */
+
 @media (prefers-reduced-motion: reduce) {
   .sl-voice-orb,
   .sl-orb-aura,
   .sl-orb-imgwrap,
-  .sl-orb-img,
+  .sl-orb-imgwrap::after,
   .sl-orb-ripple {
     animation: none !important;
     transition: filter 200ms ease, opacity 200ms ease !important;
+  }
+  .sl-orb-imgwrap {
     transform: none !important;
   }
 }
