@@ -1,66 +1,42 @@
 # syntax=docker/dockerfile:1
 
 # Use the official UV Python base image with Python 3.13 on Debian Bookworm
-# UV is a fast Python package manager that provides better performance than pip
-# We use the slim variant to keep the image size smaller while still having essential tools
+# UV is a fast Python package manager with better performance than pip.
 ARG PYTHON_VERSION=3.13
 FROM ghcr.io/astral-sh/uv:python${PYTHON_VERSION}-bookworm-slim AS base
 
-# Keeps Python from buffering stdout and stderr to avoid situations where
-# the application crashes without emitting any logs due to buffering.
+# Keep Python logs unbuffered and compile source to bytecode during install.
 ENV PYTHONUNBUFFERED=1
-
-# Compile Python source to bytecode (.pyc) during install so the first import
-# doesn't pay the compilation cost. This reduces agent cold-start time at the
-# expense of a slightly longer build.
 ENV UV_COMPILE_BYTECODE=1
 
 # --- Build stage ---
-# Install dependencies, build native extensions, and prepare the application
 FROM base AS build
 
-# Install build dependencies required for Python packages with native extensions
-# gcc: C compiler needed for building Python packages with C extensions
-# g++: C++ compiler needed for building Python packages with C++ extensions
-# python3-dev: Python development headers needed for compilation
-# We clean up the apt cache after installation to keep the image size down
 RUN apt-get update && apt-get install -y \
     gcc \
     g++ \
     python3-dev \
   && rm -rf /var/lib/apt/lists/*
 
-# Create a new directory for our application code
-# And set it as the working directory
 WORKDIR /app
 
-# Copy just the dependency files first, for more efficient layer caching
+# Install the locked project dependencies first for efficient layer caching.
 COPY pyproject.toml uv.lock ./
 RUN mkdir -p src
-
-# Install Python dependencies using UV's lock file
-# --locked ensures we use exact versions from uv.lock for reproducible builds
-# This creates a virtual environment and installs all dependencies
-# Ensure your uv.lock file is checked in for consistency across environments
 RUN uv sync --locked
 
-# Pre-download any ML models or files the agent needs
-# This runs before COPY . . so the download layer is cached across code-only changes.
-# The module-level command discovers installed livekit-plugins-* packages without
-# loading your agent code.
+# Pre-download the VAD and turn detector assets.
 RUN uv run --module livekit.agents download-files
 
-# Copy all remaining application files into the container
-# This includes source code, configuration files, and dependency specifications
-# (Excludes files specified in .dockerignore)
+# The generated Agent Builder lock does not include the direct Deepgram plugin.
+# Install the official LiveKit extra after the final uv-run sync step.
+RUN uv pip install --python /app/.venv/bin/python "livekit-agents[deepgram]~=1.5"
+
 COPY . .
 
 # --- Production stage ---
-# Build tools (gcc, g++, python3-dev) are not included in the final image
 FROM base
 
-# Create a non-privileged user that the app will run under.
-# See https://docs.docker.com/build/building/best-practices/#user
 ARG UID=10001
 RUN adduser \
     --disabled-password \
@@ -70,17 +46,12 @@ RUN adduser \
     --uid "${UID}" \
     appuser
 
-# Copy the application and virtual environment with correct ownership in a single layer
-# This avoids expensive recursive chown and excludes build tools from the final image
 COPY --from=build --chown=appuser:appuser /app /app
 
 WORKDIR /app
-
-# Switch to the non-privileged user for all subsequent operations
-# This improves security by not running as root
 USER appuser
 
-# Run the AgentServer using UV
-# UV will activate the virtual environment and run the agent.
-# The "start" command tells the AgentServer to connect to LiveKit and begin waiting for jobs.
-CMD ["uv", "run", "src/agent.py", "start"]
+# Use the launcher that routes Aura-2 directly through the Deepgram plugin.
+# Calling the virtualenv interpreter directly prevents a runtime sync from
+# removing the extra plugin installed above.
+CMD ["/app/.venv/bin/python", "src/start_with_deepgram.py", "start"]
