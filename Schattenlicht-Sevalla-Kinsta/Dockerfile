@@ -24,12 +24,13 @@ WORKDIR /app
 COPY package.json ./
 RUN npm install --omit=dev --no-audit --no-fund
 
-# Voice-agent dependencies. The generated lock remains untouched; provider
-# plugins are installed afterwards into the same virtual environment.
-COPY agent/pyproject.toml agent/uv.lock ./agent/
+# Voice-agent dependencies. The Builder export has no uv.lock, so dependencies
+# are resolved during the image build and the provider plugins are then added
+# to the same virtual environment.
+COPY agent/pyproject.toml ./agent/
 RUN mkdir -p agent/src \
   && cd agent \
-  && uv sync --locked --no-dev \
+  && uv sync --no-dev \
   && uv run --module livekit.agents download-files \
   && uv pip install --python /app/agent/.venv/bin/python \
        "livekit-agents[deepgram,openai]~=1.5"
