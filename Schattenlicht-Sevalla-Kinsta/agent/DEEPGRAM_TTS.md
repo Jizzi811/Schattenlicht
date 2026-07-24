@@ -22,9 +22,13 @@ DEEPGRAM_TTS_MODEL=aura-2-julius-de
 NVIDIA_API_KEY=...
 NVIDIA_BASE_URL=https://integrate.api.nvidia.com/v1
 NVIDIA_LLM_MODEL=openai/gpt-oss-20b
+
+SCHATTENLICHT_AMBIENCE_VOLUME=0.02
 ```
 
 Die Modellvariablen sind optional; die gezeigten Werte sind die eingebauten Standards. Die drei API-/LiveKit-Zugangsdaten sind erforderlich.
+
+`SCHATTENLICHT_AMBIENCE_VOLUME` darf zwischen `0` und `1` liegen. Der Standardwert `0.02` ist bewusst sehr leise; `0` deaktiviert die Atmosphäre hörbar vollständig.
 
 ## Start
 
