@@ -5,7 +5,8 @@
   "type": "module",
   "description": "Schattenlicht Homepage mit integriertem LiveKit Voice-Orb für Sevalla Application Hosting.",
   "scripts": {
-    "start": "node server.mjs",
+    "start": "sh start-all.sh",
+    "web": "node server.mjs",
     "voice": "/app/agent/.venv/bin/python /app/agent/src/start_self_hosted.py start",
     "check": "node --check server.mjs && node --check public/orb-agent.js"
   },
