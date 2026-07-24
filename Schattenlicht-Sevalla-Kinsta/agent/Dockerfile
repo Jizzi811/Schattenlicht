@@ -18,10 +18,10 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /app
 
-# Install the locked Builder-export dependencies first.
-COPY pyproject.toml uv.lock ./
+# The Builder export has no uv.lock, so resolve the declared dependencies.
+COPY pyproject.toml ./
 RUN mkdir -p src
-RUN uv sync --locked
+RUN uv sync --no-dev
 
 # Download local VAD and turn-detector assets before copying application code.
 RUN uv run --module livekit.agents download-files
