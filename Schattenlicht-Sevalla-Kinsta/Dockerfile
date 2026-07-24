@@ -20,9 +20,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR /app
 
-# Website dependencies.
-COPY package.json package-lock.json ./
-RUN npm ci --omit=dev
+# Website dependencies. This repository intentionally has no package-lock.json.
+COPY package.json ./
+RUN npm install --omit=dev --no-audit --no-fund
 
 # Voice-agent dependencies. The generated lock remains untouched; provider
 # plugins are installed afterwards into the same virtual environment.
