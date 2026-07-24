@@ -30,10 +30,13 @@ NVIDIA_API_KEY=...
 NVIDIA_BASE_URL=https://integrate.api.nvidia.com/v1
 NVIDIA_LLM_MODEL=openai/gpt-oss-20b
 
+SCHATTENLICHT_AMBIENCE_VOLUME=0.02
 ALLOWED_ORIGINS=https://deine-domain.tld
 ```
 
 `LIVEKIT_AGENT_NAME` muss beim Webprozess und beim Voice-Worker identisch sein. Der eigene Name `Schattenlicht-Selfhosted` verhindert, dass der alte Builder-Agent versehentlich einen Auftrag übernimmt.
+
+Mit `SCHATTENLICHT_AMBIENCE_VOLUME=0.02` bleibt die Waldatmosphäre sehr dezent. Mit `0` wird sie vollständig stummgeschaltet.
 
 ## Sevalla-Build einstellen
 
@@ -92,6 +95,7 @@ LiveKit-Worker registriert sich als: Schattenlicht-Selfhosted
 Deepgram STT wird direkt verwendet
 NVIDIA LLM wird direkt verwendet
 Deepgram TTS wird direkt verwendet
+Hintergrundatmosphäre läuft mit Lautstärke 0.02
 ```
 
 Fehlt eine Variable, beendet sich der Worker mit einer klaren Meldung, beispielsweise:
