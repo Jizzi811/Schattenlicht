@@ -38,7 +38,7 @@ docker run --env-file .env.local schattenlicht-agent
 Lokal:
 
 ```bash
-uv sync --locked
+uv sync
 uv pip install "livekit-agents[deepgram,openai]~=1.5"
 uv run python src/start_self_hosted.py console
 ```
