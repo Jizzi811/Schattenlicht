@@ -1,6 +1,11 @@
 #!/bin/sh
 set -eu
 
+# Webserver und Worker müssen exakt denselben Dispatch-Namen verwenden.
+# Der eigene Name verhindert außerdem, dass der alte Builder-Agent die Räume
+# übernimmt, während der Self-hosted Worker getestet wird.
+export LIVEKIT_AGENT_NAME="${LIVEKIT_AGENT_NAME:-Schattenlicht-Selfhosted}"
+
 VOICE_PID=""
 WEB_PID=""
 
@@ -17,7 +22,7 @@ shutdown() {
 
 trap shutdown TERM INT EXIT
 
-echo "Starte Schattenlicht Voice-Worker …"
+echo "Starte Schattenlicht Voice-Worker als ${LIVEKIT_AGENT_NAME} …"
 /app/agent/.venv/bin/python /app/agent/src/start_self_hosted.py start &
 VOICE_PID=$!
 
