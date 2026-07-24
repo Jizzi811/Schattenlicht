@@ -1,51 +1,70 @@
-# Direkte Deepgram-Stimme für Schattenlicht
+# Schattenlicht ohne LiveKit Inference
 
-Schattenlicht verwendet für die Ausgabe weiterhin die deutsche Stimme **Julius** (`aura-2-julius-de`). Die TTS-Anfragen laufen jetzt über das offizielle Deepgram-Plugin von LiveKit direkt zu Deepgram. Dadurch wird für die Sprachausgabe kein LiveKit-Inference-Guthaben mehr verbraucht.
+Der selbst gehostete Launcher `src/start_self_hosted.py` ersetzt die drei im Builder-Export eingetragenen LiveKit-Inference-Dienste, ohne den langen Systemprompt in `agent.py` umzubauen:
 
-## Benötigte Variable
+- STT: Deepgram Nova-3 direkt
+- LLM: NVIDIA über die OpenAI-kompatible API
+- TTS: Deepgram Aura-2 Julius direkt
 
-Beim separat deployten LiveKit-Agenten muss diese Umgebungsvariable gesetzt sein:
-
-```text
-DEEPGRAM_API_KEY=dein_deepgram_key
-```
-
-Optional lässt sich die Stimme ohne Codeänderung austauschen:
+## Benötigte Variablen
 
 ```text
+LIVEKIT_URL=wss://DEIN-PROJEKT.livekit.cloud
+LIVEKIT_API_KEY=...
+LIVEKIT_API_SECRET=...
+LIVEKIT_AGENT_NAME=Schattenlicht-Selfhosted
+
+DEEPGRAM_API_KEY=...
+DEEPGRAM_STT_MODEL=nova-3
+DEEPGRAM_STT_LANGUAGE=de
 DEEPGRAM_TTS_MODEL=aura-2-julius-de
+
+NVIDIA_API_KEY=...
+NVIDIA_BASE_URL=https://integrate.api.nvidia.com/v1
+NVIDIA_LLM_MODEL=openai/gpt-oss-20b
 ```
 
-Geeignete weitere deutsche Aura-2-Modelle sind beispielsweise `aura-2-fabian-de`, `aura-2-elara-de`, `aura-2-lara-de` oder `aura-2-kara-de`.
+Die Modellvariablen sind optional; die gezeigten Werte sind die eingebauten Standards. Die drei API-/LiveKit-Zugangsdaten sind erforderlich.
 
-## Deployment
+## Start
 
-Der Docker-Startbefehl nutzt automatisch:
+Mit Docker:
 
-```text
-src/start_with_deepgram.py
+```bash
+docker build -t schattenlicht-agent .
+docker run --env-file .env.local schattenlicht-agent
 ```
 
-Nach dem Eintragen oder Ändern des Keys muss der **Python-Agent bei LiveKit Cloud neu deployt** werden. Ein Neustart nur der Webseite auf Sevalla/Kinsta reicht nicht, weil die Stimme im separaten Agent-Service erzeugt wird.
-
-## Lokal testen
+Lokal:
 
 ```bash
 uv sync --locked
-uv pip install "livekit-agents[deepgram]~=1.5"
-uv run python src/start_with_deepgram.py console
+uv pip install "livekit-agents[deepgram,openai]~=1.5"
+uv run python src/start_self_hosted.py console
+```
+
+Produktion:
+
+```bash
+uv run python src/start_self_hosted.py start
+```
+
+## Dispatch-Name
+
+Der Launcher ersetzt den fest im Builder-Export eingetragenen Namen durch `LIVEKIT_AGENT_NAME`. Die Webseite muss denselben Namen bei der Raumerstellung anfordern. Für die parallele Testphase mit dem alten Builder-Agenten wird empfohlen:
+
+```text
+LIVEKIT_AGENT_NAME=Schattenlicht-Selfhosted
 ```
 
 ## Fehlerdiagnose
 
-Fehlt der Key, steht im Agent-Log ausdrücklich:
+Der Worker protokolliert beim Start die ausgewählten Dienste und Modelle, aber niemals die Schlüssel. Fehlende Variablen führen zu einer eindeutigen Fehlermeldung.
 
-```text
-DEEPGRAM_API_KEY fehlt. Hinterlege den Key beim LiveKit-Agenten und deploye ihn danach erneut.
-```
+Falls der Worker verbunden ist, aber keine Antwort erzeugt, zuerst prüfen:
 
-Bei einem ungültigen Key, fehlendem Deepgram-Guthaben oder einem Provider-Fehler erscheint die eigentliche Deepgram-Fehlermeldung im LiveKit-Agent-Log.
-
-## Wichtig
-
-Nur die **Sprachausgabe** läuft damit direkt über Deepgram. Die aktuelle Spracherkennung (`assemblyai/...`) und das Sprachmodell (`xai/grok-4.5`) laufen im bestehenden Agent-Code weiterhin über LiveKit Inference und können dessen Guthaben weiterhin verbrauchen.
+1. Ist das NVIDIA-Modell unter dem verwendeten API-Key freigeschaltet?
+2. Unterstützt das gewählte Modell Chat Completions und Tool-Aufrufe?
+3. Ist bei Deepgram noch Guthaben beziehungsweise Kontingent vorhanden?
+4. Stimmen `LIVEKIT_URL`, `LIVEKIT_API_KEY` und `LIVEKIT_API_SECRET` mit dem Projekt der Webseite überein?
+5. Ist `LIVEKIT_AGENT_NAME` im Webprozess und Worker exakt gleich geschrieben?
