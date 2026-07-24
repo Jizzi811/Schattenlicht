@@ -8,7 +8,8 @@ that generated module:
 - NVIDIA's OpenAI-compatible API for the language model
 - Deepgram Aura-2 Julius for German speech output
 
-It also overrides the fixed Builder dispatch name with ``LIVEKIT_AGENT_NAME``.
+It also overrides the fixed Builder dispatch name with ``LIVEKIT_AGENT_NAME``
+and lowers the forest ambience so it cannot overpower the voice.
 """
 
 from __future__ import annotations
@@ -17,6 +18,7 @@ import logging
 import os
 from typing import Any
 
+import livekit.agents as agents_module
 from dotenv import load_dotenv
 from livekit.agents import AgentServer, inference
 from livekit.plugins import deepgram, openai
@@ -25,6 +27,7 @@ load_dotenv(".env.local")
 
 logger = logging.getLogger("agent-Schattenlicht")
 _original_rtc_session = AgentServer.rtc_session
+_original_audio_config = agents_module.AudioConfig
 
 
 def _required_env(name: str) -> str:
@@ -35,6 +38,16 @@ def _required_env(name: str) -> str:
             "Schattenlicht-Workers und starte den Prozess danach neu."
         )
     return value
+
+
+def _float_env(name: str, default: float) -> float:
+    raw = os.getenv(name, "").strip()
+    if not raw:
+        return default
+    try:
+        return float(raw)
+    except ValueError as exc:
+        raise RuntimeError(f"{name} muss eine Zahl sein, zum Beispiel 0.02.") from exc
 
 
 def _direct_deepgram_stt(*_args: Any, **_kwargs: Any):
@@ -102,11 +115,19 @@ def _rtc_session_with_configured_name(
     return _original_rtc_session(self, *args, **kwargs)
 
 
+def _quiet_audio_config(*args: Any, **kwargs: Any):
+    volume = max(0.0, min(1.0, _float_env("SCHATTENLICHT_AMBIENCE_VOLUME", 0.02)))
+    kwargs["volume"] = volume
+    logger.info("Hintergrundatmosphäre läuft mit Lautstärke %.2f.", volume)
+    return _original_audio_config(*args, **kwargs)
+
+
 # Apply the compatibility bridge before importing the generated Builder module.
 inference.STT = _direct_deepgram_stt
 inference.LLM = _direct_nvidia_llm
 inference.TTS = _direct_deepgram_tts
 AgentServer.rtc_session = _rtc_session_with_configured_name
+agents_module.AudioConfig = _quiet_audio_config
 
 import agent as schattenlicht_agent  # noqa: E402
 
